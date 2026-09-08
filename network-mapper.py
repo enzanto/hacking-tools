@@ -107,7 +107,7 @@ class networkMapper:
                 continue
 
             src_port = random.randint(1025, 65534)
-            dst_port = 445
+            dst_port = 80
             ans = sr1(
                 IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="A"),
                 timeout=2,
