@@ -1,5 +1,6 @@
 from ipaddress import IPv4Network
-from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1
+import random
+from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP
 
 
 class networkMapper:
@@ -86,8 +87,42 @@ class networkMapper:
                 responding.append({"IP": str(host)})
         return responding, blocking
 
+    # Layer 4 scan with TCP ACK
+    def tcp_ack(self) -> list[dict]:
+        """Performs a TCP ACK scan to reveal active hosts on selected network
 
-test = networkMapper("10.1.1.0/27")
+        This scan sends an ACK packet to selected ports, if there is a service on the selected
+        port, a RST packet is returned since we do not have a connection established. This method
+        can penetrate stateless firewalls.
 
-results = test.ping_network()
-print(results)
+        returns:
+            A list of dicts with the IP and open ports of live hosts."""
+        addresses = self.network
+        responding = []
+        for host in addresses:
+            if len(list(addresses)) > 1 and host in (
+                addresses.network_address,
+                addresses.broadcast_address,
+            ):
+                continue
+
+            src_port = random.randint(1025, 65534)
+            dst_port = 445
+            ans = sr1(
+                IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="A"),
+                timeout=2,
+                verbose=0,
+            )
+
+            if ans is None:
+                continue
+            else:
+                responding.append({"IP": str(host)})
+        return responding
+
+
+test = networkMapper("192.168.100.244")
+
+results = test.tcp_ack()
+# results = test.ping_network()
+# print(results)
