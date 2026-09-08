@@ -63,7 +63,10 @@ class networkMapper:
         responding = []
         blocking = []
         for host in addresses:
-            if host in (addresses.network_address, addresses.broadcast_address):
+            if len(list(addresses)) > 1 and host in (
+                addresses.network_address,
+                addresses.broadcast_address,
+            ):
                 continue
             ans = sr1(
                 IP(dst=str(host)) / ICMP(),
