@@ -20,6 +20,7 @@
             (python3.withPackages (ps:
               with ps; [
                 debugpy
+                scapy # this is for the network scanning
               ]))
             git
           ];
