@@ -1,5 +1,5 @@
 from ipaddress import IPv4Network
-from scapy.all import srp, Ether, ARP
+from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1
 
 
 class networkMapper:
@@ -17,7 +17,7 @@ class networkMapper:
 
         returns:
             A list of dicts containing the IP addresses and MAC addresses of responsive and live hosts"""
-        ans, unans = srp(
+        ans, _ = srp(
             Ether(dst="ff:ff:ff:ff:ff:ff")  # using all ff sends the packet to broadcast
             / ARP(pdst=str(self.network)),
             timeout=2,
@@ -26,8 +26,68 @@ class networkMapper:
         results = [{"IP": r.psrc, "MAC": r.hwsrc} for _, r in ans]
         return results
 
+    # This uses sr and nor sr1 - fires ALL pings at once = noisy noisy!
+    # Layer 3 scan
+    def ping_network_fast(
+        self,
+    ) -> list[dict]:
+        """Performs an ICMP scan og selected network to find live hosts
 
-test = networkMapper("192.168.1.0/24")
+        This scan operates on Layer 3 and can be routed to selected network. By using the sr module
+        this sends all ICMP packets at once and is very noisy!
 
-results = test.arp_scan()
+        returns:
+            A list of dictionaries displaying the IP address of responsive hosts."""
+        network = self.network
+        ans, _ = sr(
+            IP(dst=str(network)) / ICMP(),
+            timeout=2,
+            verbose=0,
+        )
+        results = [{"IP": r.src} for _, r in ans]
+        return results
+
+    # this uses the sr1, firing one ping at the time, more stealthy
+    # layer 3 scan
+    def ping_network(self) -> tuple[list[dict], list[dict]]:
+        """Performs an ICMP scan on selected network to fin live hosts
+
+        This scan operates on Layer 3 and can be routed to selected network. By using the sr1 module
+        this sends one ICMP packet at the time for a more stealthy approach.
+
+        returns:
+            A tuple with two lists, one with dicts of live hosts and one with dicts of blocked hosts.
+        """
+        addresses = self.network
+        responding = []
+        blocking = []
+        for host in addresses:
+            if host in (addresses.network_address, addresses.broadcast_address):
+                continue
+            ans = sr1(
+                IP(dst=str(host)) / ICMP(),
+                timeout=0.2,  # sets the agressiveness of the scan
+                verbose=0,
+            )
+            if ans is None:
+                continue
+            elif int(ans.getlayer(ICMP).type) == 3 and int(
+                ans.getlayer(ICMP).code
+            ) in [  # type 3 is destination unreachable
+                1,
+                2,
+                3,
+                9,
+                10,
+                13,
+            ]:
+                blocking.append({"IP": str(host)})
+            else:
+                responding.append({"IP": str(host)})
+        return responding, blocking
+
+
+test = networkMapper("10.1.1.0/27")
+
+results = test.ping_network()
 print(results)
