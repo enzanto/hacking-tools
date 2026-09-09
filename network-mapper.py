@@ -164,7 +164,7 @@ class networkMapper:
                 elif ans.haslayer(TCP):
                     if ans[TCP].flags == "SA":  # this checks for SYN-ACK flags
                         server_seq = ans[TCP].seq
-                        send_rst = send(
+                        send(
                             IP(dst=str(host))
                             / TCP(
                                 sport=src_port,
