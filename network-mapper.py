@@ -91,7 +91,7 @@ class networkMapper:
         return responding, blocking
 
     # Layer 4 scan with TCP ACK
-    def tcp_ack(self) -> list[dict]:
+    def tcp_ack(self, ports: list[int] | None = None) -> list[dict]:
         """Performs a TCP ACK scan to reveal active hosts on selected network
 
         This scan sends an ACK packet to selected ports, if there is a service on the selected
@@ -101,6 +101,8 @@ class networkMapper:
         returns:
             A list of dicts with the IP and open ports of live hosts."""
         addresses = self.network
+        if ports == None:
+            ports = [80]  # Setting port 80 as standard, most likely to get thorugh FW
         responding = []
         for host in addresses:
             if len(list(addresses)) > 1 and host in (
@@ -109,18 +111,19 @@ class networkMapper:
             ):
                 continue
 
-            src_port = random.randint(1025, 65534)
-            dst_port = 80
-            ans = sr1(
-                IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="A"),
-                timeout=2,
-                verbose=0,
-            )
+            for port in ports:
+                src_port = random.randint(1025, 65534)
+                dst_port = port
+                ans = sr1(
+                    IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="A"),
+                    timeout=2,
+                    verbose=0,
+                )
 
-            if ans is None:
-                continue
-            else:
-                responding.append({"IP": str(host)})
+                if ans is None:
+                    continue
+                else:
+                    responding.append({"IP": str(host)})
         return responding
 
     # Layer 4 scan with TCP syn
