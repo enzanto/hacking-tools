@@ -174,8 +174,9 @@ class networkMapper:
         return result
 
 
-test = networkMapper("192.168.100.244")
+if __name__ == "__main__":
+    test = networkMapper("192.168.100.244")
 
-results = test.tcp_ack()
-# results = test.ping_network()
-# print(results)
+    results = test.tcp_syn()
+    # results = test.ping_network()
+    # print(results)
