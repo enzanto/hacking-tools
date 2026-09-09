@@ -162,7 +162,7 @@ class networkMapper:
                     )
                     continue
                 elif ans.haslayer(TCP):
-                    if ans[TCP].flags == 0x12:  # This is the hex value of SYN+ACK
+                    if ans[TCP].flags == "SA":  # this checks for SYN-ACK flags
                         server_seq = ans[TCP].seq
                         send_rst = send(
                             IP(dst=str(host))
@@ -179,8 +179,8 @@ class networkMapper:
                             {"IP": str(host), "PORT": dst_port, "State": "Open"}
                         )
                     elif (
-                        ans.getlayer(TCP).flags == 0x14
-                    ):  # This is the hex value of ACK+RST
+                        ans[TCP].flags == "RA"  # This checks for RST-ACK flags
+                    ):
                         result.append(
                             {"IP": str(host), "PORT": dst_port, "State": "Closed"}
                         )
