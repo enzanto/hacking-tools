@@ -124,7 +124,7 @@ class networkMapper:
         return responding
 
     # Layer 4 scan with TCP syn
-    def tcp_syn(self) -> list[dict]:
+    def tcp_syn(self, ports: list[int] | None = None) -> list[dict]:
         """Performs a TCP SYN scan to reveal active hosts on selected network
 
         This scan sends an SYN packet to selected ports, if there is a service on the selected
@@ -134,6 +134,8 @@ class networkMapper:
         returns:
             A list of dicts with the IP and open ports of live hosts."""
         addresses = self.network
+        if ports == None:
+            ports = [80]
         result = []
         for host in addresses:
             if len(list(addresses)) > 1 and host in (
@@ -141,36 +143,40 @@ class networkMapper:
                 addresses.broadcast_address,
             ):
                 continue
+            for port in ports:
+                src_port = random.randint(1025, 65534)
+                dst_port = port
+                ans = sr1(
+                    IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="S"),
+                    timeout=2,
+                    verbose=0,
+                )
 
-            src_port = random.randint(1025, 65534)
-            dst_port = 80
-            ans = sr1(
-                IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="S"),
-                timeout=2,
-                verbose=0,
-            )
-
-            if ans is None:
-                result.append({"IP": str(host), "PORT": dst_port, "State": "Filtered"})
-                continue
-            elif ans.haslayer(TCP):
-                if ans.getlayer(TCP).flags == 0x12:  # This is the hex value of SYN+ACK
-                    send_rst = sr(
-                        IP(dst=str(host))
-                        / TCP(sport=src_port, dport=dst_port, flags="R"),
-                        timeout=1,
-                        verbose=0,
-                    )
-                    result.append({"IP": str(host), "PORT": dst_port, "State": "Open"})
-                elif (
-                    ans.getlayer(TCP).flags == 0x14
-                ):  # This is the hex value of ACK+RST
+                if ans is None:
                     result.append(
-                        {"IP": str(host), "PORT": dst_port, "State": "Closed"}
+                        {"IP": str(host), "PORT": dst_port, "State": "Filtered"}
                     )
+                    continue
+                elif ans.haslayer(TCP):
+                    if (
+                        ans.getlayer(TCP).flags == 0x12
+                    ):  # This is the hex value of SYN+ACK
+                        send_rst = sr(
+                            IP(dst=str(host))
+                            / TCP(sport=src_port, dport=dst_port, flags="R"),
+                            timeout=1,
+                            verbose=0,
+                        )
+                        result.append(
+                            {"IP": str(host), "PORT": dst_port, "State": "Open"}
+                        )
+                    elif (
+                        ans.getlayer(TCP).flags == 0x14
+                    ):  # This is the hex value of ACK+RST
+                        result.append(
+                            {"IP": str(host), "PORT": dst_port, "State": "Closed"}
+                        )
 
-            else:
-                result.append({"IP": str(host)})
         return result
 
 
