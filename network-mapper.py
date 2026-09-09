@@ -1,6 +1,6 @@
 from ipaddress import IPv4Network
 import random
-from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP
+from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP, send
 
 
 class networkMapper:
@@ -144,13 +144,17 @@ class networkMapper:
             ):
                 continue
             for port in ports:
+                client_seq = random.randint(1000, 10000)
+                server_seq = None
                 src_port = random.randint(1025, 65534)
                 dst_port = port
                 ans = sr1(
-                    IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="S"),
+                    IP(dst=str(host))
+                    / TCP(sport=src_port, dport=dst_port, flags="S", seq=client_seq),
                     timeout=2,
                     verbose=0,
                 )
+                client_seq += 1
 
                 if ans is None:
                     result.append(
@@ -158,13 +162,17 @@ class networkMapper:
                     )
                     continue
                 elif ans.haslayer(TCP):
-                    if (
-                        ans.getlayer(TCP).flags == 0x12
-                    ):  # This is the hex value of SYN+ACK
-                        send_rst = sr(
+                    if ans[TCP].flags == 0x12:  # This is the hex value of SYN+ACK
+                        server_seq = ans[TCP].seq
+                        send_rst = send(
                             IP(dst=str(host))
-                            / TCP(sport=src_port, dport=dst_port, flags="R"),
-                            timeout=1,
+                            / TCP(
+                                sport=src_port,
+                                dport=dst_port,
+                                flags="R",
+                                seq=client_seq,
+                                ack=server_seq + 1,
+                            ),
                             verbose=0,
                         )
                         result.append(
