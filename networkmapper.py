@@ -236,8 +236,17 @@ class networkMapper:
 if __name__ == "__main__":
     # test = networkMapper("192.168.1.0/24")
     # test = networkMapper("10.1.1.32/27")
-    test = networkMapper("10.1.1.41")
+    test = networkMapper("10.1.1.2")
 
-    results = test.tcp_syn()
+    # results = test.arp_scan()
     # results = test.ping_network()
+    # results = test.ping_network_fast()
     # print(results)
+    # for host in test.live_hosts.values():
+    #     print(host)
+    results = test.tcp_syn(ports=[80, 443])
+    # results = test.tcp_ack(ports=[80])
+    # for host in test.live_hosts.values():
+    #     print(host)
+    print(test.live_hosts)
+    print(results)
