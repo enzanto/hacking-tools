@@ -3,10 +3,41 @@ import random
 from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP, send
 
 
+@dataclass
+class Host:
+    ip: str
+    mac: str = ""
+    ports: list[int] = field(default_factory=list)
+    live: bool = True
+
+    def add_ports(self, new_ports):
+        self.ports = sorted(set(self.ports) | set(new_ports))
+
+
 class networkMapper:
     def __init__(self, network: str, timeout: float = 2.0):
         self.network = IPv4Network(network)
         self.timeout = timeout
+        self.live_hosts = {}
+
+    def add_host(
+        self,
+        ip: str,
+        mac: str | None = None,
+        ports: list[int] | None = None,
+        live: bool = True,
+    ):
+        if ip in self.live_hosts:
+            host = self.live_hosts[ip]
+            if ports:
+                host.add_ports(ports)
+            if mac:
+                host.mac = mac
+            host.live = live
+        else:
+            self.live_hosts[ip] = Host(
+                ip=ip, mac=mac or "", ports=ports or [], live=live
+            )
 
     # layer 2 scan
     def arp_scan(self) -> list[dict]:
@@ -18,13 +49,16 @@ class networkMapper:
 
         returns:
             A list of dicts containing the IP addresses and MAC addresses of responsive and live hosts"""
+        results = []
         ans, _ = srp(
             Ether(dst="ff:ff:ff:ff:ff:ff")  # using all ff sends the packet to broadcast
             / ARP(pdst=str(self.network)),
             timeout=2,
             inter=0.05,  # Added intervall to allow for WiFi clients to respond.
         )
-        results = [{"IP": r.psrc, "MAC": r.hwsrc} for _, r in ans]
+        for _, r in ans:
+            self.add_host(r.psrc, mac=r.hwsrc)
+            results.append(self.live_hosts[r.psrc])
         return results
 
     # This uses sr and nor sr1 - fires ALL pings at once = noisy noisy!
@@ -40,17 +74,20 @@ class networkMapper:
         returns:
             A list of dictionaries displaying the IP address of responsive hosts."""
         network = self.network
+        results = []
         ans, _ = sr(
             IP(dst=str(network)) / ICMP(),
             timeout=2,
             verbose=0,
         )
-        results = [{"IP": r.src} for _, r in ans]
+        for _, r in ans:
+            self.add_host(r.src)
+            results.append(self.live_hosts[r.src])
         return results
 
     # this uses the sr1, firing one ping at the time, more stealthy
     # layer 3 scan
-    def ping_network(self) -> tuple[list[dict], list[dict]]:
+    def ping_network(self) -> list[dict]:
         """Performs an ICMP scan on selected network to fin live hosts
 
         This scan operates on Layer 3 and can be routed to selected network. By using the sr1 module
@@ -60,8 +97,7 @@ class networkMapper:
             A tuple with two lists, one with dicts of live hosts and one with dicts of blocked hosts.
         """
         addresses = self.network
-        responding = []
-        blocking = []
+        results = []
         for host in addresses:
             if len(list(addresses)) > 1 and host in (
                 addresses.network_address,
@@ -75,20 +111,22 @@ class networkMapper:
             )
             if ans is None:
                 continue
-            elif int(ans.getlayer(ICMP).type) == 3 and int(
-                ans.getlayer(ICMP).code
-            ) in [  # type 3 is destination unreachable
-                1,
-                2,
-                3,
-                9,
-                10,
-                13,
-            ]:
-                blocking.append({"IP": str(host)})
+            # Not sure if i want to store blocked ICMPs - deactivated for now
+            # elif int(ans.getlayer(ICMP).type) == 3 and int(
+            #     ans.getlayer(ICMP).code
+            # ) in [  # type 3 is destination unreachable
+            #     1,
+            #     2,
+            #     3,
+            #     9,
+            #     10,
+            #     13,
+            # ]:
+            # blocking.append({"IP": str(host)})
             else:
-                responding.append({"IP": str(host)})
-        return responding, blocking
+                self.add_host(ans.src)
+                results.append(self.live_hosts[ans.src])
+        return results
 
     # Layer 4 scan with TCP ACK
     def tcp_ack(self, ports: list[int] | None = None) -> list[dict]:
@@ -99,11 +137,11 @@ class networkMapper:
         can penetrate stateless firewalls.
 
         returns:
-            A list of dicts with the IP and open ports of live hosts."""
+            A list of dicts with the IP and open ports of live hosts."""  ## open ports can't be verified this way
         addresses = self.network
         if ports == None:
             ports = [80]  # Setting port 80 as standard, most likely to get thorugh FW
-        responding = []
+        results = []
         for host in addresses:
             if len(list(addresses)) > 1 and host in (
                 addresses.network_address,
@@ -119,12 +157,13 @@ class networkMapper:
                     timeout=2,
                     verbose=0,
                 )
-
+                # Maybe break after first validated response?
                 if ans is None:
                     continue
-                else:
-                    responding.append({"IP": str(host)})
-        return responding
+                elif ans.haslayer(TCP) and ans[TCP].flags == "R":
+                    self.add_host(ans.src)
+                    results.append(self.live_hosts[ans.src])
+        return results
 
     # Layer 4 scan with TCP syn
     def tcp_syn(self, ports: list[int] | None = None) -> list[dict]:
@@ -139,8 +178,11 @@ class networkMapper:
         addresses = self.network
         if ports == None:
             ports = [80]
-        result = []
+        results = []
         for host in addresses:
+            open_ports = []
+            closed_ports = []
+            filteres_ports = []
             if len(list(addresses)) > 1 and host in (
                 addresses.network_address,
                 addresses.broadcast_address,
@@ -159,10 +201,9 @@ class networkMapper:
                 )
                 client_seq += 1
 
+                # print(ans.show())
                 if ans is None:
-                    result.append(
-                        {"IP": str(host), "PORT": dst_port, "State": "Filtered"}
-                    )
+                    filteres_ports.append(port)
                     continue
                 elif ans.haslayer(TCP):
                     if ans[TCP].flags == "SA":  # this checks for SYN-ACK flags
@@ -178,17 +219,17 @@ class networkMapper:
                             ),
                             verbose=0,
                         )
-                        result.append(
-                            {"IP": str(host), "PORT": dst_port, "State": "Open"}
-                        )
+
+                        open_ports.append(ans.sport)
                     elif (
                         ans[TCP].flags == "RA"  # This checks for RST-ACK flags
                     ):
-                        result.append(
-                            {"IP": str(host), "PORT": dst_port, "State": "Closed"}
-                        )
+                        closed_ports.append(ans.sport)
+            print(open_ports)
+            self.add_host(str(host), ports=open_ports)
+            results.append(self.live_hosts[str(host)])
 
-        return result
+        return results
 
 
 if __name__ == "__main__":
