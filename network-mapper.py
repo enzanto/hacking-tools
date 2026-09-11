@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from ipaddress import IPv4Network
 import random
 from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP, send
@@ -233,7 +234,9 @@ class networkMapper:
 
 
 if __name__ == "__main__":
-    test = networkMapper("192.168.100.244")
+    # test = networkMapper("192.168.1.0/24")
+    # test = networkMapper("10.1.1.32/27")
+    test = networkMapper("10.1.1.41")
 
     results = test.tcp_syn()
     # results = test.ping_network()
