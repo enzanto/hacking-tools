@@ -16,7 +16,7 @@ class Host:
 
 
 class networkMapper:
-    def __init__(self, network: str, timeout: float = 2.0):
+    def __init__(self, network: str = "192.168.1.0/24", timeout: float = 2.0):
         self.network = IPv4Network(network)
         self.timeout = timeout
         self.live_hosts = {}

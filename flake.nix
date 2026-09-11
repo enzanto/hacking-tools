@@ -21,6 +21,7 @@
               with ps; [
                 debugpy
                 scapy # this is for the network scanning
+                simple-term-menu
               ]))
             git
           ];
