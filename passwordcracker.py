@@ -12,9 +12,7 @@ class PasswordCracker:
         teststring = "test"
         return teststring
 
-    def hash_cracker(
-        self, hash: str, wordlist: str | None = None, hash_type: str = "md5"
-    ):
+    def hash_cracker(self, hash: str, wordlist: str, hash_type: str = "md5"):
         hash_names = [
             "blake2b",
             "blake2s",
@@ -30,10 +28,8 @@ class PasswordCracker:
             "sha512",
         ]
 
-        wordlist = (
-            "/home/fredrik/Documents/Noroff/fag/EP2/hacking-tools/wordlist/rockyou.txt"
-        )
-        total_lines = sum(1 for line in open(wordlist, "rb"))
+        with open(wordlist, "rb") as f:
+            total_lines = sum(1 for _ in f)
         hash_func = getattr(hashlib, hash_type, None)
         if hash_func is None or hash_type not in hash_names:
             raise ValueError()
@@ -41,9 +37,9 @@ class PasswordCracker:
         with open(wordlist, "rb") as f:
             for line in tqdm(f, desc="Cracking hash", total=total_lines):
                 try:  # skips entries that are not utf-8 encoded
-                    decoded_line = line.decode()
-                    if hash_func(decoded_line.strip().encode()).hexdigest() == hash:
-                        self.cracked.append(decoded_line)
+                    decoded_line = line.decode().strip()
+                    if hash_func(decoded_line.encode()).hexdigest() == hash:
+                        self.cracked.append((hash, decoded_line))
                         loot = decoded_line
                         break
                 except UnicodeDecodeError:
@@ -53,10 +49,13 @@ class PasswordCracker:
 
 
 if __name__ == "__main__":
+    wordlist = (
+        "/home/fredrik/Documents/Noroff/fag/EP2/hacking-tools/wordlist/rockyou.txt"
+    )
     # hash = "e99a18c428cb38d5f260853678922e03"
     # hash = "07d10604216a46ce7439b32cfa7bcdd6"
-    pwd = "0125457423"
+    pwd = "!!Boom!!"
     # pwd = "password123"
     hash = hashlib.md5(pwd.encode()).hexdigest()
     test = PasswordCracker()
-    test.hash_cracker(hash=hash)
+    test.hash_cracker(hash=hash, wordlist=wordlist)
