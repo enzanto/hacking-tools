@@ -19,6 +19,9 @@ class CliMenu:
 
         This checks if the user have input a valid IPv4 address with correct CIDR notation
 
+        args:
+            network (str): Nettwork address as a string
+
         returns:
             A validated IPv4 address as a string, or None if validation failed"""
         try:
@@ -65,6 +68,10 @@ class CliMenu:
         return loot_string
 
     def main_cli(self):
+        """This displays the main CLI menu
+
+        The main CLI menu with alternatives to all submenus, Information, setup and loot."""
+
         tools = {
             "INFO": "Go to settings first  and set up targets before launching scanners!",
             "Setup": "Change settings for target hosts, ports etc",
@@ -92,6 +99,10 @@ class CliMenu:
                 self.password_cracker_menu()
 
     def setup_menu(self):
+        """Displays the setup menu
+
+        The setup menu is to set up target Hosts, target Ports, wordlists locations and target hashes."""
+
         settings_choices = {
             "Current Settings": f"Target Hosts: {self.target_hosts}\nTarget ports: {self.target_ports}",
             "Target Hosts": "Sets the target hosts in CIDR notation",
@@ -115,6 +126,10 @@ class CliMenu:
                 print(f"The target has been set to: {self.target_hosts}")
 
     def loot_menu(self):
+        """Displays the loot menu
+
+        The loot menu will display any gathered information from performed scans and hash cracking."""
+
         loot_choices = {
             "Hosts with ports": self._loot_hosts(),
             "Passwords": self._loot_pwd(),
@@ -131,6 +146,10 @@ class CliMenu:
                 back = True
 
     def network_mapper_menu(self):
+        """Displays the network mapper menu
+
+        The network mapper menu list all possible network scans and performs the scan when selected."""
+
         scan_alternatives = {
             "ARP-scan": "Scans local network using ARP packets \n Requires target network set",
             "ICMP-scan": "an explanation",
@@ -152,6 +171,10 @@ class CliMenu:
                 self.net_scanner.arp_scan(network=self.target_hosts)
 
     def password_cracker_menu(self):
+        """Displays the password cracker menu
+
+        the password cracker menu show selected wordlists and perform the hash cracking when selected"""
+
         pwd_alternatives = {
             "Info!": f"Hash set: {self.hash}\nWordlist: {self.wordlist}\nHash method: {self.hash_type}",
             "Crack hash": "Execute hash cracking, requires wordlist and hash set.",
