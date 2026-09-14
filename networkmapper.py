@@ -28,6 +28,19 @@ class networkMapper:
         ports: list[int] | None = None,
         live: bool = True,
     ):
+        """An internal helper function
+
+        This function adds hosts to object variable to store discovered hosts and ports
+
+
+        Args:
+            ip (str): An IP address of the host
+            mac (str): The MAC address of the host
+            ports (list[int]): A list of port numbers
+            live (bool): A True or False to indicate if the host is live
+
+
+        """
         if ip in self.live_hosts:
             host = self.live_hosts[ip]
             if ports:
@@ -47,6 +60,9 @@ class networkMapper:
         This scan only works on local subnet (Layer 2) and is not able to traverse to another subnet.
         An intervall of 0.05 seconds have been chosen to allow for wifi connected devices to respond,
         and not falesly show up as non-responsive.
+
+        Args:
+            network (str|None): A string with CIDR network address
 
         returns:
             A list of dicts containing the IP addresses and MAC addresses of responsive and live hosts"""
@@ -72,6 +88,9 @@ class networkMapper:
         This scan operates on Layer 3 and can be routed to selected network. By using the sr module
         this sends all ICMP packets at once and is very noisy!
 
+        Args:
+            network (str|None): A string with CIDR network address
+
         returns:
             A list of dictionaries displaying the IP address of responsive hosts."""
         network = self.network
@@ -93,6 +112,9 @@ class networkMapper:
 
         This scan operates on Layer 3 and can be routed to selected network. By using the sr1 module
         this sends one ICMP packet at the time for a more stealthy approach.
+
+        Args:
+            network (str|None): A string with CIDR network address
 
         returns:
             A tuple with two lists, one with dicts of live hosts and one with dicts of blocked hosts.
@@ -130,12 +152,18 @@ class networkMapper:
         return results
 
     # Layer 4 scan with TCP ACK
-    def tcp_ack(self, ports: list[int] | None = None) -> list[dict]:
+    def tcp_ack(
+        self, network: str | None = None, ports: list[int] | None = None
+    ) -> list[dict]:
         """Performs a TCP ACK scan to reveal active hosts on selected network
 
         This scan sends an ACK packet to selected ports, if there is a service on the selected
         port, a RST packet is returned since we do not have a connection established. This method
         can penetrate stateless firewalls.
+
+        Args:
+            network (str|None): A string with CIDR network address
+            ports (list[int]|None): A list of int for the port numbers
 
         returns:
             A list of dicts with the IP and open ports of live hosts."""  ## open ports can't be verified this way
@@ -167,12 +195,18 @@ class networkMapper:
         return results
 
     # Layer 4 scan with TCP syn
-    def tcp_syn(self, ports: list[int] | None = None) -> list[dict]:
+    def tcp_syn(
+        self, network: str | None = None, ports: list[int] | None = None
+    ) -> list[dict]:
         """Performs a TCP SYN scan to reveal active hosts on selected network
 
         This scan sends an SYN packet to selected ports, if there is a service on the selected
         port, an ACK is recieved if the port is open. If an ACK is received and the port is open
         we close it gracefully with an RST packet. This method can penetrate stateful firewalls.
+
+        Args:
+            network (str|None): A string with CIDR network address
+            ports (list[int]|None): A list of int for the port numbers
 
         returns:
             A list of dicts with the IP and open ports of live hosts."""
