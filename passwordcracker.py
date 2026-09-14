@@ -13,6 +13,18 @@ class PasswordCracker:
         return teststring
 
     def hash_cracker(self, hash: str, wordlist: str, hash_type: str = "md5"):
+        """Function to compare hashes to wordlists
+
+        Takes a string of hashed values and compares it to the hashed value of words
+        in a wordlist. It can use different hashing methods.
+
+        args:
+            hash (str): A string with the target hash
+            wordlist (str): A string with the path to the wordlist file
+            hash_type (str): A string representing the hashing method to use.
+
+        returns:
+            str | None: A string if password is cracked, else None is returned."""
         hash_names = [
             "blake2b",
             "blake2s",
@@ -46,6 +58,7 @@ class PasswordCracker:
                     continue
         if loot is not None:
             print(f"Added to loot: {loot}")
+        return loot
 
 
 if __name__ == "__main__":
