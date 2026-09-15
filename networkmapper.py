@@ -46,6 +46,37 @@ class networkMapper:
             print(f"An unexpected error occured {e}")
             return None
 
+    def _validate_ports(self, ports: str) -> int | list[int] | tuple:
+        """An internal validation function to validate ports
+
+        This function takes a string and converts it to either an int, a list of int or a tuple
+        single int for one port, list of int for multiple ports and a tuple for a port range
+
+        args:
+            ports (str): A string with the port values
+
+        returns:
+            int: for a single port
+            list[int]: for multiple ports
+            tuple: for a port range"""
+        result = []
+        try:
+            if "-" in ports:
+                split = ports.split("-")
+                result = int(split[0]), int(split[1])
+                if result[0] > result[1]:
+                    raise ValueError("Port range must go from lowest to highest")
+            elif "," in ports:
+                split = ports.split(",")
+                for i in split:
+                    result.append(int(i))
+            else:
+                print(ports)
+                result = int(ports)
+        except ValueError as e:
+            print(f"Invalid port number selected: {e}")
+        return result
+
     def add_host(
         self,
         ip: str,
