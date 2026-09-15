@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from ipaddress import IPv4Network
+from ipaddress import IPv4Network, AddressValueError, NetmaskValueError
 import random
 from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP, send
 
@@ -20,6 +20,31 @@ class networkMapper:
         self.network = IPv4Network(network)
         self.timeout = timeout
         self.live_hosts = {}
+
+    def _network_validation(self, network: str) -> IPv4Network | None:
+        """An internal validation function to check IPv4 validity
+
+        This checks if the user have input a valid IPv4 address with correct CIDR notation
+
+        args:
+            network (str): Nettwork address as a string
+
+        returns:
+            A validated IPv4 address as a string, or None if validation failed"""
+        try:
+            validated_network = IPv4Network(network)
+            return validated_network
+        except AddressValueError:
+            print("Selected network address needs to be 4 octets")
+            print("example: 192.168.1.1 or 192.168.1.0/24")
+            return None
+        except NetmaskValueError:
+            print("Selected network mask is out of bounds")
+            print("Use a netmask of max /32")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occured {e}")
+            return None
 
     def add_host(
         self,
@@ -54,7 +79,7 @@ class networkMapper:
             )
 
     # layer 2 scan
-    def arp_scan(self) -> list[dict]:
+    def arp_scan(self, network: str | None = None) -> list[dict]:
         """Performs an ARP scan on local subnet to discover Host IPs and their MAC addresses
 
         This scan only works on local subnet (Layer 2) and is not able to traverse to another subnet.
@@ -66,23 +91,29 @@ class networkMapper:
 
         returns:
             A list of dicts containing the IP addresses and MAC addresses of responsive and live hosts"""
+        if network is None:
+            network = str(self.network)
         results = []
-        ans, _ = srp(
-            Ether(dst="ff:ff:ff:ff:ff:ff")  # using all ff sends the packet to broadcast
-            / ARP(pdst=str(self.network)),
-            timeout=2,
-            inter=0.05,  # Added intervall to allow for WiFi clients to respond.
-        )
-        for _, r in ans:
-            self.add_host(r.psrc, mac=r.hwsrc)
-            results.append(self.live_hosts[r.psrc])
+        try:
+            ans, _ = srp(
+                Ether(
+                    dst="ff:ff:ff:ff:ff:ff"
+                )  # using all ff sends the packet to broadcast
+                / ARP(pdst=network),
+                timeout=2,
+                inter=0.05,  # Added intervall to allow for WiFi clients to respond.
+            )
+            for _, r in ans:
+                self.add_host(r.psrc, mac=r.hwsrc)
+                results.append(self.live_hosts[r.psrc])
+                print(f"Added to loot: {r.psrc}")
+        except PermissionError as e:
+            print(f"This must be run as Admin/root {e}")
         return results
 
     # This uses sr and nor sr1 - fires ALL pings at once = noisy noisy!
     # Layer 3 scan
-    def ping_network_fast(
-        self,
-    ) -> list[dict]:
+    def ping_network_fast(self, network: str | None = None) -> list[dict]:
         """Performs an ICMP scan og selected network to find live hosts
 
         This scan operates on Layer 3 and can be routed to selected network. By using the sr module
@@ -93,21 +124,25 @@ class networkMapper:
 
         returns:
             A list of dictionaries displaying the IP address of responsive hosts."""
-        network = self.network
+        if network == None:
+            network = str(self.network)
         results = []
-        ans, _ = sr(
-            IP(dst=str(network)) / ICMP(),
-            timeout=2,
-            verbose=0,
-        )
-        for _, r in ans:
-            self.add_host(r.src)
-            results.append(self.live_hosts[r.src])
+        try:
+            ans, _ = sr(
+                IP(dst=network) / ICMP(),
+                timeout=2,
+                verbose=0,
+            )
+            for _, r in ans:
+                self.add_host(r.src)
+                results.append(self.live_hosts[r.src])
+        except PermissionError as e:
+            print(f"This must be run as Admin/root {e}")
         return results
 
     # this uses the sr1, firing one ping at the time, more stealthy
     # layer 3 scan
-    def ping_network(self) -> list[dict]:
+    def ping_network(self, network: str | None = None) -> list[dict]:
         """Performs an ICMP scan on selected network to fin live hosts
 
         This scan operates on Layer 3 and can be routed to selected network. By using the sr1 module
@@ -119,36 +154,45 @@ class networkMapper:
         returns:
             A tuple with two lists, one with dicts of live hosts and one with dicts of blocked hosts.
         """
-        addresses = self.network
+        if network is None:
+            addresses = self.network
+        else:
+            addresses = self._network_validation(network)
+            print("checked addresses")
+            print(type(addresses))
         results = []
-        for host in addresses:
-            if len(list(addresses)) > 1 and host in (
-                addresses.network_address,
-                addresses.broadcast_address,
-            ):
-                continue
-            ans = sr1(
-                IP(dst=str(host)) / ICMP(),
-                timeout=0.2,  # sets the agressiveness of the scan
-                verbose=0,
-            )
-            if ans is None:
-                continue
-            # Not sure if i want to store blocked ICMPs - deactivated for now
-            # elif int(ans.getlayer(ICMP).type) == 3 and int(
-            #     ans.getlayer(ICMP).code
-            # ) in [  # type 3 is destination unreachable
-            #     1,
-            #     2,
-            #     3,
-            #     9,
-            #     10,
-            #     13,
-            # ]:
-            # blocking.append({"IP": str(host)})
-            else:
-                self.add_host(ans.src)
-                results.append(self.live_hosts[ans.src])
+        try:
+            for host in addresses:
+                if len(list(addresses)) > 1 and host in (
+                    addresses.network_address,
+                    addresses.broadcast_address,
+                ):
+                    continue
+                ans = sr1(
+                    IP(dst=str(host)) / ICMP(),
+                    timeout=0.2,  # sets the agressiveness of the scan
+                    verbose=0,
+                )
+                if ans is None:
+                    continue
+                # Not sure if i want to store blocked ICMPs - deactivated for now
+                # elif int(ans.getlayer(ICMP).type) == 3 and int(
+                #     ans.getlayer(ICMP).code
+                # ) in [  # type 3 is destination unreachable
+                #     1,
+                #     2,
+                #     3,
+                #     9,
+                #     10,
+                #     13,
+                # ]:
+                # blocking.append({"IP": str(host)})
+                else:
+                    self.add_host(ans.src)
+                    results.append(self.live_hosts[ans.src])
+                    print(f"Added to loot: {ans.src}")
+        except PermissionError as e:
+            print(f"This must be run as Admin/root {e}")
         return results
 
     # Layer 4 scan with TCP ACK
@@ -171,27 +215,31 @@ class networkMapper:
         if ports == None:
             ports = [80]  # Setting port 80 as standard, most likely to get thorugh FW
         results = []
-        for host in addresses:
-            if len(list(addresses)) > 1 and host in (
-                addresses.network_address,
-                addresses.broadcast_address,
-            ):
-                continue
-
-            for port in ports:
-                src_port = random.randint(1025, 65534)
-                dst_port = port
-                ans = sr1(
-                    IP(dst=str(host)) / TCP(sport=src_port, dport=dst_port, flags="A"),
-                    timeout=2,
-                    verbose=0,
-                )
-                # Maybe break after first validated response?
-                if ans is None:
+        try:
+            for host in addresses:
+                if len(list(addresses)) > 1 and host in (
+                    addresses.network_address,
+                    addresses.broadcast_address,
+                ):
                     continue
-                elif ans.haslayer(TCP) and ans[TCP].flags == "R":
-                    self.add_host(ans.src)
-                    results.append(self.live_hosts[ans.src])
+
+                for port in ports:
+                    src_port = random.randint(1025, 65534)
+                    dst_port = port
+                    ans = sr1(
+                        IP(dst=str(host))
+                        / TCP(sport=src_port, dport=dst_port, flags="A"),
+                        timeout=2,
+                        verbose=0,
+                    )
+                    # Maybe break after first validated response?
+                    if ans is None:
+                        continue
+                    elif ans.haslayer(TCP) and ans[TCP].flags == "R":
+                        self.add_host(ans.src)
+                        results.append(self.live_hosts[ans.src])
+        except PermissionError as e:
+            print(f"This must be run as Admin/root {e}")
         return results
 
     # Layer 4 scan with TCP syn
@@ -214,55 +262,60 @@ class networkMapper:
         if ports == None:
             ports = [80]
         results = []
-        for host in addresses:
-            open_ports = []
-            closed_ports = []
-            filteres_ports = []
-            if len(list(addresses)) > 1 and host in (
-                addresses.network_address,
-                addresses.broadcast_address,
-            ):
-                continue
-            for port in ports:
-                client_seq = random.randint(1000, 10000)
-                server_seq = None
-                src_port = random.randint(1025, 65534)
-                dst_port = port
-                ans = sr1(
-                    IP(dst=str(host))
-                    / TCP(sport=src_port, dport=dst_port, flags="S", seq=client_seq),
-                    timeout=2,
-                    verbose=0,
-                )
-                client_seq += 1
-
-                # print(ans.show())
-                if ans is None:
-                    filteres_ports.append(port)
+        try:
+            for host in addresses:
+                open_ports = []
+                closed_ports = []
+                filteres_ports = []
+                if len(list(addresses)) > 1 and host in (
+                    addresses.network_address,
+                    addresses.broadcast_address,
+                ):
                     continue
-                elif ans.haslayer(TCP):
-                    if ans[TCP].flags == "SA":  # this checks for SYN-ACK flags
-                        server_seq = ans[TCP].seq
-                        send(
-                            IP(dst=str(host))
-                            / TCP(
-                                sport=src_port,
-                                dport=dst_port,
-                                flags="R",
-                                seq=client_seq,
-                                ack=server_seq + 1,
-                            ),
-                            verbose=0,
-                        )
+                for port in ports:
+                    client_seq = random.randint(1000, 10000)
+                    server_seq = None
+                    src_port = random.randint(1025, 65534)
+                    dst_port = port
+                    ans = sr1(
+                        IP(dst=str(host))
+                        / TCP(
+                            sport=src_port, dport=dst_port, flags="S", seq=client_seq
+                        ),
+                        timeout=2,
+                        verbose=0,
+                    )
+                    client_seq += 1
 
-                        open_ports.append(ans.sport)
-                    elif (
-                        ans[TCP].flags == "RA"  # This checks for RST-ACK flags
-                    ):
-                        closed_ports.append(ans.sport)
-            print(open_ports)
-            self.add_host(str(host), ports=open_ports)
-            results.append(self.live_hosts[str(host)])
+                    # print(ans.show())
+                    if ans is None:
+                        filteres_ports.append(port)
+                        continue
+                    elif ans.haslayer(TCP):
+                        if ans[TCP].flags == "SA":  # this checks for SYN-ACK flags
+                            server_seq = ans[TCP].seq
+                            send(
+                                IP(dst=str(host))
+                                / TCP(
+                                    sport=src_port,
+                                    dport=dst_port,
+                                    flags="R",
+                                    seq=client_seq,
+                                    ack=server_seq + 1,
+                                ),
+                                verbose=0,
+                            )
+
+                            open_ports.append(ans.sport)
+                        elif (
+                            ans[TCP].flags == "RA"  # This checks for RST-ACK flags
+                        ):
+                            closed_ports.append(ans.sport)
+                print(open_ports)
+                self.add_host(str(host), ports=open_ports)
+                results.append(self.live_hosts[str(host)])
+        except PermissionError as e:
+            print(f"This must be run as Admin/root {e}")
 
         return results
 
