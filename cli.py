@@ -169,6 +169,16 @@ class CliMenu:
             elif scanner_menu_choice == "ARP-scan":
                 # TODO: Validate that self.target_hosts have been set!
                 self.net_scanner.arp_scan(network=self.target_hosts)
+            elif scanner_menu_choice == "ICMP-scan":
+                self.net_scanner.ping_network(network=self.target_hosts)
+            elif scanner_menu_choice == "TCP-ACK-scan":
+                self.net_scanner.tcp_ack(
+                    network=self.target_hosts, ports=self.target_ports
+                )
+            elif scanner_menu_choice == "TCP-SYN-scan":
+                self.net_scanner.tcp_syn(
+                    network=self.target_hosts, ports=self.target_ports
+                )
 
     def password_cracker_menu(self):
         """Displays the password cracker menu
