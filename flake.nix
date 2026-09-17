@@ -20,8 +20,11 @@
             (python3.withPackages (ps:
               with ps; [
                 debugpy
+                requests
                 scapy # this is for the network scanning
                 simple-term-menu
+                tkinter
+                tqdm
               ]))
             git
           ];
