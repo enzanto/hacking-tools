@@ -275,7 +275,7 @@ class networkMapper:
 
     # Layer 4 scan with TCP syn
     def tcp_syn(
-        self, network: str | None = None, ports: list[int] | None = None
+        self, network: str | None = None, ports: str | None = None
     ) -> list[dict]:
         """Performs a TCP SYN scan to reveal active hosts on selected network
 
@@ -289,9 +289,26 @@ class networkMapper:
 
         returns:
             A list of dicts with the IP and open ports of live hosts."""
-        addresses = self.network
+        scan_ports = []
+        addresses = []
+        print(ports)
+        if network is None:
+            addresses = self.network
+        else:
+            addresses = self._network_validation(network)
+            print("checked addresses")
+            print(type(addresses))
         if ports == None:
-            ports = [80]
+            scan_ports = [80]
+        else:
+            validated_ports = self._validate_ports(ports=ports)
+            print(validated_ports)
+            if isinstance(validated_ports, tuple):
+                for i in range(validated_ports[0], validated_ports[1] + 1):
+                    scan_ports.append(i)
+            elif isinstance(validated_ports, list):
+                scan_ports.extend(validated_ports)
+        print(scan_ports)
         results = []
         try:
             for host in addresses:
@@ -303,7 +320,8 @@ class networkMapper:
                     addresses.broadcast_address,
                 ):
                     continue
-                for port in ports:
+                for port in scan_ports:
+                    print(port)
                     client_seq = random.randint(1000, 10000)
                     server_seq = None
                     src_port = random.randint(1025, 65534)
@@ -313,7 +331,7 @@ class networkMapper:
                         / TCP(
                             sport=src_port, dport=dst_port, flags="S", seq=client_seq
                         ),
-                        timeout=2,
+                        timeout=0.2,  # sets the wait time if packet is not answered
                         verbose=0,
                     )
                     client_seq += 1
@@ -354,7 +372,7 @@ class networkMapper:
 if __name__ == "__main__":
     # test = networkMapper("192.168.1.0/24")
     # test = networkMapper("10.1.1.32/27")
-    test = networkMapper("10.1.1.2")
+    test = networkMapper("10.1.1.39")
 
     # results = test.arp_scan()
     # results = test.ping_network()
@@ -362,9 +380,10 @@ if __name__ == "__main__":
     # print(results)
     # for host in test.live_hosts.values():
     #     print(host)
-    results = test.tcp_syn(ports=[80, 443])
+    results = test.tcp_syn(ports="22,80,443")
     # results = test.tcp_ack(ports=[80])
     # for host in test.live_hosts.values():
     #     print(host)
     print(test.live_hosts)
     print(results)
+    ### Problem with sr is that it does not close it gracefully fast enough
