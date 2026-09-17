@@ -11,7 +11,7 @@ class CliMenu:
         self.hash = "c55f43e33481bbece1d8ec015e406a1e"
         self.wordlist = "wordlist/rockyou.txt"
         self.hash_type = "md5"
-        self.net_scanner = networkmapper.networkMapper()
+        self.net_scanner = networkmapper.NetworkMapper()
         self.password_cracker = passwordcracker.PasswordCracker()
 
     def _network_validation(self, network: str) -> str | None:

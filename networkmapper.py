@@ -15,7 +15,7 @@ class Host:
         self.ports = sorted(set(self.ports) | set(new_ports))
 
 
-class networkMapper:
+class NetworkMapper:
     def __init__(self, network: str = "192.168.1.0/24", timeout: float = 2.0):
         self.network = IPv4Network(network)
         self.timeout = timeout
@@ -370,9 +370,9 @@ class networkMapper:
 
 
 if __name__ == "__main__":
-    # test = networkMapper("192.168.1.0/24")
-    # test = networkMapper("10.1.1.32/27")
-    test = networkMapper("10.1.1.39")
+    # test = NetworkMapper("192.168.1.0/24")
+    # test = NetworkMapper("10.1.1.32/27")
+    test = NetworkMapper("10.1.1.39")
 
     # results = test.arp_scan()
     # results = test.ping_network()

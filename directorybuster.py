@@ -2,7 +2,7 @@ import requests
 from tqdm import tqdm
 
 
-class directoryBuster:
+class DirectoryBuster:
     def __init__(self):
         self.target = "http://10.1.1.39"
         self.agent = (
@@ -33,7 +33,7 @@ class directoryBuster:
 
 
 if __name__ == "__main__":
-    t = directoryBuster()
+    t = DirectoryBuster()
     t.directory_brute(target="10.1.1.39", wordlist="wordlist/common.txt")
     for loot in t.loot:
         print(loot)
