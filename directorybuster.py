@@ -15,7 +15,7 @@ class DirectoryBuster:
         """An internal function to provide a list of words
 
         This functions takes a wordlist provided with one word per line, and splits
-        it in to separate words. Then enclose it in slashes (/) before appending to list.
+        it in to separate words.
 
         args:
             wordlist (str): A string with the location of the wordlist to open.
@@ -23,12 +23,13 @@ class DirectoryBuster:
         returns (list): A list with words for directory brute"""
         words = []
         with open(wordlist) as f:
-            raw_words = f.read().split()
-        for word in raw_words:
-            if "." in word:
-                words.append(f"/{word}")
-            else:
-                words.append(f"/{word}/")
+            words = f.read().split()
+            # raw_words = f.read().split()
+        # for word in raw_words:
+        #     if "." in word:
+        #         words.append(f"/{word}")
+        #     else:
+        #         words.append(f"/{word}/")
         return words
 
     def directory_brute(self, target: str, wordlist: str):
@@ -48,7 +49,10 @@ class DirectoryBuster:
         words = self._get_words(wordlist)
         headers = {"User-Agent": self.agent}
         for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
-            url = f"{self.target}{i}"
+            if "." in i:
+                url = f"{self.target}/{i}"
+            else:
+                url = f"{self.target}/{i}/"
             r = requests.get(url, headers=headers)
             if r.status_code == 200:
                 self.loot.append(url)
