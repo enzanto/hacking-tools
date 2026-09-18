@@ -24,12 +24,6 @@ class DirectoryBuster:
         words = []
         with open(wordlist) as f:
             words = f.read().split()
-            # raw_words = f.read().split()
-        # for word in raw_words:
-        #     if "." in word:
-        #         words.append(f"/{word}")
-        #     else:
-        #         words.append(f"/{word}/")
         return words
 
     def directory_brute(self, target: str, wordlist: str):
