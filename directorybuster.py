@@ -1,5 +1,7 @@
 import requests
 from tqdm import tqdm
+import time
+import re
 
 
 class DirectoryBuster:
@@ -50,6 +52,30 @@ class DirectoryBuster:
             r = requests.get(url, headers=headers)
             if r.status_code == 200:
                 self.loot.append(url)
+
+    def subdirectory_brute(self, target: str, wordlist: str):
+        pattern = "^[a-zA-Z0-9]+[a-zA-Z0-9-][a-zA-Z0-9]+$"
+        word_list = []
+        with open(wordlist) as f:
+            raw_words = f.read().split()
+            for word in raw_words:
+                if re.search(pattern, word):
+                    word_list.append(word.lower())
+
+        words = set(word_list)
+        # words = set(word_list.sort())
+        # words = self._get_words(wordlist)
+        headers = {"User-Agent": self.agent}
+        for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
+            url = f"https://{i}.{target}"
+            try:
+                r = requests.get(url, headers=headers, timeout=5)
+                if r.status_code == 200:
+                    self.loot.append(url)
+            except requests.exceptions.RequestException:
+                continue
+            finally:
+                time.sleep(0.15)  # sleep timer to avoid rate limit with DNS queries
 
 
 if __name__ == "__main__":
