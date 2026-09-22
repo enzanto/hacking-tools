@@ -3,6 +3,8 @@ from tqdm import tqdm
 import time
 import re
 
+from filehandler import read_list
+
 
 class DirectoryBuster:
     def __init__(self):
@@ -42,7 +44,7 @@ class DirectoryBuster:
         returns:
             loot (list[str]): Returns a list of strings with successful directories or files"""
 
-        words = self._get_words(wordlist)
+        words = read_list(wordlist)
         headers = {"User-Agent": self.agent}
         for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
             if "." in i:
@@ -56,11 +58,10 @@ class DirectoryBuster:
     def subdirectory_brute(self, target: str, wordlist: str):
         pattern = "^[a-zA-Z0-9]+[a-zA-Z0-9-][a-zA-Z0-9]+$"
         word_list = []
-        with open(wordlist) as f:
-            raw_words = f.read().split()
-            for word in raw_words:
-                if re.search(pattern, word):
-                    word_list.append(word.lower())
+        raw_words = read_list(wordlist)
+        for word in raw_words:
+            if re.search(pattern, word):
+                word_list.append(word.lower())
 
         words = set(word_list)
         # words = set(word_list.sort())
