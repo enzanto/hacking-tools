@@ -10,9 +10,17 @@ class PasswordCracker:
         self.wordlist: str | None = None
         self.hash_type: str | None = None
 
-    def verify_hash(self):
-        teststring = "test"
-        return teststring
+    def verify_hash(self, hash: str):
+        hash_lengts = {
+            32: ["md5"],
+            40: ["sha1"],
+            56: ["sha225", "sha3_224"],
+            64: ["blake2s", "sha256", "sha3_256"],
+            96: ["sha384", "sha3_384"],
+            128: ["blake2b", "sha512", "sha3_512"],
+        }
+        length = len(hash)
+        return hash_lengts[length]
 
     def hash_cracker(self, hash: str, wordlist: str, hash_type: str = "md5"):
         """Function to compare hashes to wordlists
