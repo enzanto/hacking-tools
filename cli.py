@@ -61,9 +61,7 @@ class CliMenu:
 
         returns:
             A multi-line string with discovered hashes"""
-        loot_lines = []
-        for pwd in self.password_cracker.cracked:
-            loot_lines.append(f"hash: {pwd[0]}, password: {pwd[1]}")
+        loot_lines = self.password_cracker.cracked
         loot_string = "\n".join(loot_lines)
         return loot_string
 
@@ -104,9 +102,12 @@ class CliMenu:
         The setup menu is to set up target Hosts, target Ports, wordlists locations and target hashes."""
 
         settings_choices = {
-            "Current Settings": f"Target Hosts: {self.target_hosts}\nTarget ports: {self.target_ports}",
+            "Current Settings": "Press enter to print the current settings",
             "Target Hosts": "Sets the target hosts in CIDR notation",
             "Target Ports": "A comma-separated list of ports",
+            "Hash": "A password hash",
+            "Hash Type": "Hash type of hash",
+            "Hash list": "Path to a file of hashes",
             "Back": "Return to previous menu",
         }
         settings_menu = TerminalMenu(
@@ -118,12 +119,31 @@ class CliMenu:
             settings_menu_choice = list(settings_choices)[idx]
             if settings_menu_choice == "Back":
                 back = True
+            elif settings_menu_choice == "Current Settings":
+                print(f"Target Host: {self.target_hosts}")
+                print(f"Target Ports: {self.target_ports}")
+                print(f"Hash: {self.hash}")
+                print(f"Hash Type: {self.hash_type}")
+                print(f"Hash List: {self.hash_list}")
+                print("\n")
             elif settings_menu_choice == "Target Hosts":
                 # Asks for IPv4 address, and validates it
                 user_input = input("Type a network or host address in CIDR notation: ")
                 validated = self._network_validation(network=user_input)
                 self.target_hosts = validated
-                print(f"The target has been set to: {self.target_hosts}")
+                print(f"The target has been set to: {self.target_hosts}\n")
+            elif settings_menu_choice == "Hash":
+                user_input = input("Paste the hash to crack: ")
+                self.hash = user_input
+                print(f"Hash has been set to {self.hash}\n")
+            elif settings_menu_choice == "Hash Type":
+                user_input = input("Type the hash type (md5, sha1, sha256 etc): ")
+                self.hash_type = user_input
+                print(f"Hash has been set to {self.hash_type}\n")
+            elif settings_menu_choice == "Hash list":
+                user_input = input("Enter path to list of hashes: ")
+                self.hash_list = user_input
+                print(f"Hash has been set to {self.hash_list}\n")
 
     def loot_menu(self):
         """Displays the loot menu
@@ -186,7 +206,7 @@ class CliMenu:
         the password cracker menu show selected wordlists and perform the hash cracking when selected"""
 
         pwd_alternatives = {
-            "Info!": f"Hash set: {self.hash}\nWordlist: {self.wordlist}\nHash method: {self.hash_type}",
+            "Info!": f"Hash set: {self.hash}\nWordlist: {self.wordlist}\nHash method: {self.hash_type}\nHashlist: {self.hash_list}",
             "Crack hash": "Execute hash cracking, requires wordlist and hash set.",
             "Back": "Return to previous menu",
         }
@@ -202,7 +222,10 @@ class CliMenu:
             elif pwd_menu_choice == "Crack hash":
                 # TODO: Validate that self.target_hosts have been set!
                 self.password_cracker.hash_cracker(
-                    hash=self.hash, wordlist=self.wordlist, hash_type=self.hash_type
+                    hash=self.hash,
+                    wordlist=self.wordlist,
+                    hash_type=self.hash_type,
+                    hashlist=self.hash_list,
                 )
 
 

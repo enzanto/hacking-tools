@@ -82,13 +82,17 @@ class PasswordCracker:
                 decoded_line = line.decode().strip()
                 for h in hash_types:
                     if hash_names[h](decoded_line.encode()).hexdigest() in hashes:
-                        self.cracked.append(decoded_line)
+                        if decoded_line not in self.cracked:
+                            self.cracked.append(decoded_line)
                         loot.append(decoded_line)
                         print(f"Added to loot: {decoded_line}")
                         break
             except UnicodeDecodeError:
                 continue
-        return loot
+        unique_loot = set(loot)
+        for l in unique_loot:
+            print(f"Added to loot: {l}")
+        return unique_loot
 
 
 if __name__ == "__main__":
