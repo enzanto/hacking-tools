@@ -1,6 +1,8 @@
 import hashlib
 from tqdm import tqdm
 
+from filehandler import read_list
+
 
 class PasswordCracker:
     def __init__(self):
@@ -39,23 +41,21 @@ class PasswordCracker:
             "sha3_512",
             "sha512",
         ]
-
-        with open(wordlist, "rb") as f:
-            total_lines = sum(1 for _ in f)
+        words = read_list(wordlist, mode="rb")
+        total_lines = sum(1 for _ in words)
         hash_func = getattr(hashlib, hash_type, None)
         if hash_func is None or hash_type not in hash_names:
             raise ValueError()
         loot = None
-        with open(wordlist, "rb") as f:
-            for line in tqdm(f, desc="Cracking hash", total=total_lines):
-                try:  # skips entries that are not utf-8 encoded
-                    decoded_line = line.decode().strip()
-                    if hash_func(decoded_line.encode()).hexdigest() == hash:
-                        self.cracked.append((hash, decoded_line))
-                        loot = decoded_line
-                        break
-                except UnicodeDecodeError:
-                    continue
+        for line in tqdm(words, desc="Cracking hash", total=total_lines):
+            try:  # skips entries that are not utf-8 encoded
+                decoded_line = line.decode().strip()
+                if hash_func(decoded_line.encode()).hexdigest() == hash:
+                    self.cracked.append((hash, decoded_line))
+                    loot = decoded_line
+                    break
+            except UnicodeDecodeError:
+                continue
         if loot is not None:
             print(f"Added to loot: {loot}")
         return loot
