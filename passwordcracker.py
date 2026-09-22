@@ -85,7 +85,6 @@ class PasswordCracker:
                         if decoded_line not in self.cracked:
                             self.cracked.append(decoded_line)
                         loot.append(decoded_line)
-                        print(f"Added to loot: {decoded_line}")
                         break
             except UnicodeDecodeError:
                 continue
