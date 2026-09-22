@@ -22,7 +22,13 @@ class PasswordCracker:
         length = len(hash)
         return hash_lengts[length]
 
-    def hash_cracker(self, hash: str, wordlist: str, hash_type: str = "md5"):
+    def hash_cracker(
+        self,
+        wordlist: str,
+        hash: str | None = None,
+        hashlist: str | None = None,
+        hash_type: str | None = None,
+    ):
         """Function to compare hashes to wordlists
 
         Takes a string of hashed values and compares it to the hashed value of words
@@ -35,33 +41,51 @@ class PasswordCracker:
 
         returns:
             str | None: A string if password is cracked, else None is returned."""
-        hash_names = [
-            "blake2b",
-            "blake2s",
-            "md5",
-            "sha1",
-            "sha224",
-            "sha256",
-            "sha384",
-            "sha3_224",
-            "sha3_256",
-            "sha3_384",
-            "sha3_512",
-            "sha512",
-        ]
+        hash_names = {
+            "blake2b": hashlib.blake2b,
+            "blake2s": hashlib.blake2s,
+            "md5": hashlib.md5,
+            "sha1": hashlib.sha1,
+            "sha224": hashlib.sha224,
+            "sha256": hashlib.sha256,
+            "sha384": hashlib.sha384,
+            "sha3_224": hashlib.sha3_224,
+            "sha3_256": hashlib.sha3_256,
+            "sha3_384": hashlib.sha3_384,
+            "sha3_512": hashlib.sha3_512,
+            "sha512": hashlib.sha512,
+        }
+        hashes = []
+        hash_types = []
         words = read_list(wordlist, mode="rb")
+        if hash != None:
+            hashes.append(hash)
+        if hashlist != None:
+            try:
+                hsh = read_list(hashlist)
+                hashes.extend(hsh)
+            except TypeError as e:
+                print(f"Could not add hash list: {e}")
         total_lines = sum(1 for _ in words)
-        hash_func = getattr(hashlib, hash_type, None)
-        if hash_func is None or hash_type not in hash_names:
-            raise ValueError()
-        loot = None
+        if hash_type != None:
+            if hash_type in hash_names:
+                hash_types.append(hash_type)
+            else:
+                raise ValueError()
+        else:
+            for i in hashes:
+                hash_types.extend(self.verify_hash(i))
+
+        loot = []
         for line in tqdm(words, desc="Cracking hash", total=total_lines):
             try:  # skips entries that are not utf-8 encoded
                 decoded_line = line.decode().strip()
-                if hash_func(decoded_line.encode()).hexdigest() == hash:
-                    self.cracked.append((hash, decoded_line))
-                    loot = decoded_line
-                    break
+                for h in hash_types:
+                    if hash_names[h](decoded_line.encode()).hexdigest() in hashes:
+                        self.cracked.append(decoded_line)
+                        loot.append(decoded_line)
+                        print(f"Added to loot: {decoded_line}")
+                        break
             except UnicodeDecodeError:
                 continue
         if loot is not None:
