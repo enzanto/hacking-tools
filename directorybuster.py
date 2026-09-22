@@ -46,12 +46,13 @@ class DirectoryBuster:
 
         words = read_list(wordlist)
         headers = {"User-Agent": self.agent}
+        s = requests.Session()
         for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
             if "." in i:
                 url = f"{self.target}/{i}"
             else:
                 url = f"{self.target}/{i}/"
-            r = requests.get(url, headers=headers)
+            r = s.get(url, headers=headers)
             if r.status_code == 200:
                 self.loot.append(url)
 
