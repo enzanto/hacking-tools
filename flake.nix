@@ -19,6 +19,7 @@
           packages = with pkgs; [
             (python3.withPackages (ps:
               with ps; [
+                beautifulsoup4
                 debugpy
                 requests
                 scapy # this is for the network scanning
