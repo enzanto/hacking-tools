@@ -88,8 +88,6 @@ class PasswordCracker:
                         break
             except UnicodeDecodeError:
                 continue
-        if loot is not None:
-            print(f"Added to loot: {loot}")
         return loot
 
 
