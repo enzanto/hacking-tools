@@ -1,6 +1,7 @@
 from ipaddress import IPv4Network, AddressValueError, NetmaskValueError
 import networkmapper
 import passwordcracker
+import directorybuster
 from simple_term_menu import TerminalMenu
 
 
@@ -8,11 +9,14 @@ class CliMenu:
     def __init__(self):
         self.target_hosts = None
         self.target_ports = None
-        self.hash = "c55f43e33481bbece1d8ec015e406a1e"
+        self.target_url = None
+        self.hash = None
         self.wordlist = "wordlist/rockyou.txt"
-        self.hash_type = "md5"
+        self.hash_type = None
+        self.hash_list = None
         self.net_scanner = networkmapper.NetworkMapper()
         self.password_cracker = passwordcracker.PasswordCracker()
+        self.directory_buster = directorybuster.DirectoryBuster()
 
     def _network_validation(self, network: str) -> str | None:
         """An internal validation function to check IPv4 validity
@@ -65,6 +69,18 @@ class CliMenu:
         loot_string = "\n".join(loot_lines)
         return loot_string
 
+    def _loot_dirb(self) -> str:
+        """An internal function that displays found password hashes
+
+        This function concatinates all discovered hashes to a string
+        with one hash on each line
+
+        returns:
+            A multi-line string with discovered hashes"""
+        loot_lines = self.directory_buster.loot
+        loot_string = "\n".join(loot_lines)
+        return loot_string
+
     def main_cli(self):
         """This displays the main CLI menu
 
@@ -95,6 +111,8 @@ class CliMenu:
                 self.network_mapper_menu()
             elif main_menu_choice == "Password cracker":
                 self.password_cracker_menu()
+            elif main_menu_choice == "Directory buster":
+                self.directory_buster_menu()
 
     def setup_menu(self):
         """Displays the setup menu
@@ -103,11 +121,13 @@ class CliMenu:
 
         settings_choices = {
             "Current Settings": "Press enter to print the current settings",
+            "Target URL": "Sets the target URL for web attacks",
             "Target Hosts": "Sets the target hosts in CIDR notation",
             "Target Ports": "A comma-separated list of ports",
             "Hash": "A password hash",
             "Hash Type": "Hash type of hash",
             "Hash list": "Path to a file of hashes",
+            "Wordlist": "Path to a wordlist file",
             "Back": "Return to previous menu",
         }
         settings_menu = TerminalMenu(
@@ -126,6 +146,11 @@ class CliMenu:
                 print(f"Hash Type: {self.hash_type}")
                 print(f"Hash List: {self.hash_list}")
                 print("\n")
+            elif settings_menu_choice == "Target URL":
+                # Asks for IPv4 address, and validates it
+                user_input = input("Type URL to target website: ")
+                self.target_url = user_input
+                print(f"The target has been set to: {self.target_url}\n")
             elif settings_menu_choice == "Target Hosts":
                 # Asks for IPv4 address, and validates it
                 user_input = input("Type a network or host address in CIDR notation: ")
@@ -144,6 +169,10 @@ class CliMenu:
                 user_input = input("Enter path to list of hashes: ")
                 self.hash_list = user_input
                 print(f"Hash has been set to {self.hash_list}\n")
+            elif settings_menu_choice == "Wordlist":
+                user_input = input("Enter the path wo the wordlist: ")
+                self.wordlist = user_input
+                print(f"wordlist has been set to {self.hash_list}\n")
 
     def loot_menu(self):
         """Displays the loot menu
@@ -153,6 +182,7 @@ class CliMenu:
         loot_choices = {
             "Hosts with ports": self._loot_hosts(),
             "Passwords": self._loot_pwd(),
+            "Directory buster": self._loot_dirb(),
             "Back": "Return to previous menu",
         }
         loot_menu_object = TerminalMenu(
@@ -226,6 +256,31 @@ class CliMenu:
                     wordlist=self.wordlist,
                     hash_type=self.hash_type,
                     hashlist=self.hash_list,
+                )
+
+    def directory_buster_menu(self):
+        """Displays the directory bruter menu
+
+        the directory buster menu show selected wordlists and perform the hash cracking when selected"""
+
+        db_alternatives = {
+            "Info!": f"Target url: {self.target_url}\nWordlist: {self.wordlist}",
+            "Directory bust": "Execute directory busting, requires wordlist and target url set.",
+            "Subdirectory bust": "Execute subirectory busting, requires wordlist and target url set.",
+            "Back": "Return to previous menu",
+        }
+        db_menu = TerminalMenu(
+            db_alternatives, preview_command=lambda name: db_alternatives[name]
+        )
+        back = False
+        while not back:
+            idx = db_menu.show()
+            pwd_menu_choice = list(db_alternatives)[idx]
+            if pwd_menu_choice == "Back":
+                back = True
+            elif pwd_menu_choice == "Directory bust":
+                self.directory_buster.directory_brute(
+                    target=self.target_url, wordlist=self.wordlist
                 )
 
 
