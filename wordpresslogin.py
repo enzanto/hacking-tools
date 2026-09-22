@@ -45,10 +45,19 @@ class WordpressLogin:
         if password is not None:
             passwords.append(password)
         elif passlist is not None:
-            pwd = read_list(passlist)
-            passwords.extend(pwd)
+            try:
+                pwd = read_list(passlist)
+                passwords.extend(pwd)
+            except TypeError as e:
+                print(f"could not add passlist: {e}")
+
         s = requests.Session()
-        login_page = s.get(self.target)
+        try:
+            login_page = s.get(self.target)
+            login_page.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"Could not retrieve login site: {e}")
+            return
         params = self._get_params(login_page.content)
         params["log"] = user
         for p in passwords:
@@ -56,6 +65,7 @@ class WordpressLogin:
             t = s.post(self.target, data=params)
             if "Welcome to WordPress!" in t.text:
                 self.loot[user] = p
+                loot[user] = p
                 break
         return loot
 
