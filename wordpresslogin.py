@@ -39,6 +39,19 @@ class WordpressLogin:
         passlist: str | None = None,
         userlist: str | None = None,
     ):
+        """Function to brute force wordpress logins
+
+        This function can test multiple passwords and usernames combinations to log in
+        to a wordpress admin site. For each provided username it iterates over provided passwords
+
+        args:
+            user (str|None): a single username
+            password (str|None): A single password
+            passlist (str|None): path to password list
+            userlist (str|None): path to user list
+
+        returns:
+            dict | None: a dict of username and passwords, if error returns None"""
         loot = {}
         # create a list of given passwords + wordlist passwords
         passwords = []
