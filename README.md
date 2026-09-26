@@ -8,6 +8,9 @@ This is a set of hacking tools built for my exam project at Noroff.
 - pip
 - tkinter
 
+### Windows
+Windows also need to install npcap from [npcap.com](https://npcap.com/)
+
 
 ## Installation
 
