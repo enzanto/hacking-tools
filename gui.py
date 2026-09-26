@@ -191,7 +191,30 @@ class TcpAckPanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
-        print("Add Run logic here")
+        target_host = self.target_host_entry.get()
+        if target_host == "":
+            self._log("Please enter a network address")
+            return
+        try:
+            validated_host = str(IPv4Network(target_host))
+        except AddressValueError as e:
+            self._log(f"Please select a valid address: {e}")
+            return
+        except NetmaskValueError as e:
+            self._log(f"Please select a valid network mask: {e}")
+            return
+        except ValueError as e:
+            self._log(f"unexpected value error: {e}")
+            return
+        except Exception as e:
+            self._log(f"unexpected error: {e}")
+            return
+
+        print(validated_host)
+        print(str(validated_host))
+        self.networkmapper.tcp_ack(network=validated_host)
+        for host in self.networkmapper.live_hosts.values():
+            self._log(f"IP: {host.ip}")
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
@@ -222,7 +245,29 @@ class TcpSynPanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
-        print("Add logic")
+        target_host = self.target_host_entry.get()
+        if target_host == "":
+            self._log("Please enter a network address")
+            return
+        try:
+            validated_host = str(IPv4Network(target_host))
+        except AddressValueError as e:
+            self._log(f"Please select a valid address: {e}")
+            return
+        except NetmaskValueError as e:
+            self._log(f"Please select a valid network mask: {e}")
+            return
+        except ValueError as e:
+            self._log(f"unexpected value error: {e}")
+            return
+        except Exception as e:
+            self._log(f"unexpected error: {e}")
+            return
+
+        ports = self.target_port_entry.get()
+        self.networkmapper.tcp_syn(network=validated_host, ports=ports)
+        for host in self.networkmapper.live_hosts.values():
+            self._log(f"IP: {host.ip} - Ports: {host.ports}")
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
@@ -238,20 +283,20 @@ class CrackerPanel(ttk.Frame):
             anchor="w", padx=10, pady=(10, 5)
         )
         ttk.Label(self, text="Single Hash (optional)").pack(anchor="w", padx=10)
-        self.target_host_entry = ttk.Entry(self)
-        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.hash = ttk.Entry(self)
+        self.hash.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(self, text="Hash File (optional)").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.hash_file = ttk.Entry(self)
+        self.hash_file.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(self, text="Hash Type (optional)").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.hash_type = ttk.Entry(self)
+        self.hash_type.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.wordlist = ttk.Entry(self)
+        self.wordlist.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Button(self, text="Run scanner", command=self.run).pack(
             anchor="w", padx=10, pady=5
@@ -261,7 +306,15 @@ class CrackerPanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
-        print("Add logic")
+        hash = self.hash.get() if self.hash.get() != "" else None
+        hash_file = self.hash_file.get() if self.hash_file.get() != "" else None
+        hash_type = self.hash_type.get() if self.hash_type.get() != "" else None
+        wordlist = self.wordlist.get() if self.wordlist.get() != "" else None
+        self.cracker.hash_cracker(
+            wordlist=wordlist, hash=hash, hashlist=hash_file, hash_type=hash_type
+        )
+        for pwd in self.cracker.cracked:
+            self._log(f"cracked password: {pwd}")
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
@@ -278,12 +331,12 @@ class DirectoryBrutePanel(ttk.Frame):
         )
 
         ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.wordlist_entry = ttk.Entry(self)
+        self.wordlist_entry.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Button(self, text="Run scanner", command=self.run).pack(
             anchor="w", padx=10, pady=5
@@ -293,6 +346,11 @@ class DirectoryBrutePanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
+        target_host = self.target_host_entry.get()
+        wordlist = self.wordlist_entry.get()
+        self.dirbuster.directory_brute(target=target_host, wordlist=wordlist)
+        for dir in self.dirbuster.loot:
+            self._log(dir)
         print("Add logic")
 
     def _log(self, msg):
@@ -310,13 +368,12 @@ class SubdirBrutePanel(ttk.Frame):
         )
 
         ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
-
+        self.wordlist_entry = ttk.Entry(self)
+        self.wordlist_entry.pack(fill=tk.X, padx=10, pady=5)
         ttk.Button(self, text="Run scanner", command=self.run).pack(
             anchor="w", padx=10, pady=5
         )
@@ -325,6 +382,11 @@ class SubdirBrutePanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
+        target_host = self.target_host_entry.get()
+        wordlist = self.wordlist_entry.get()
+        self.dirbuster.subdirectory_brute(target=target_host, wordlist=wordlist)
+        for dir in self.dirbuster.loot:
+            self._log(dir)
         print("Logic")
 
     def _log(self, msg):
