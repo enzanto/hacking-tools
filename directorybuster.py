@@ -49,9 +49,9 @@ class DirectoryBuster:
         s = requests.Session()
         for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
             if "." in i:
-                url = f"{self.target}/{i}"
+                url = f"{target}/{i}"
             else:
-                url = f"{self.target}/{i}/"
+                url = f"{target}/{i}/"
             r = s.get(url, headers=headers)
             if r.status_code == 200:
                 self.loot.append(url)
@@ -85,6 +85,3 @@ if __name__ == "__main__":
     t.directory_brute(target="10.1.1.39", wordlist="wordlist/common.txt")
     for loot in t.loot:
         print(loot)
-
-
-### Readlines kept the \n and the end, and split used it to split the words
