@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from ipaddress import IPv4Network, AddressValueError, NetmaskValueError
 import random
 from scapy.all import srp, Ether, ARP, ICMP, IP, sr, sr1, TCP, send
+import json
 
 
 @dataclass
@@ -206,18 +207,6 @@ class NetworkMapper:
                 )
                 if ans is None:
                     continue
-                # Not sure if i want to store blocked ICMPs - deactivated for now
-                # elif int(ans.getlayer(ICMP).type) == 3 and int(
-                #     ans.getlayer(ICMP).code
-                # ) in [  # type 3 is destination unreachable
-                #     1,
-                #     2,
-                #     3,
-                #     9,
-                #     10,
-                #     13,
-                # ]:
-                # blocking.append({"IP": str(host)})
                 else:
                     self.add_host(ans.src)
                     results.append(self.live_hosts[ans.src])
@@ -242,7 +231,13 @@ class NetworkMapper:
 
         returns:
             A list of dicts with the IP and open ports of live hosts."""  ## open ports can't be verified this way
-        addresses = self.network
+        if network == None:
+            addresses = self.network
+        else:
+            addresses = self._network_validation(network)
+            print("checked addresses")
+            print(type(addresses))
+
         if ports == None:
             ports = [80]  # Setting port 80 as standard, most likely to get thorugh FW
         results = []
@@ -260,7 +255,7 @@ class NetworkMapper:
                     ans = sr1(
                         IP(dst=str(host))
                         / TCP(sport=src_port, dport=dst_port, flags="A"),
-                        timeout=2,
+                        timeout=0.2,
                         verbose=0,
                     )
                     # Maybe break after first validated response?
