@@ -109,6 +109,13 @@ class IcmpPanel(ttk.Frame):
         ttk.Label(self, text="ICMP Scanner", font=("Arial", 13)).pack(
             anchor="w", padx=10, pady=(10, 5)
         )
+        ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
+        )
 
         self.output = tk.Text(self, height=10)
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -128,6 +135,13 @@ class TcpAckPanel(ttk.Frame):
 
         ttk.Label(self, text="TCP-ACK Scanner", font=("Arial", 13)).pack(
             anchor="w", padx=10, pady=(10, 5)
+        )
+        ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
         )
 
         self.output = tk.Text(self, height=10)
@@ -149,6 +163,17 @@ class TcpSynPanel(ttk.Frame):
         ttk.Label(self, text="TCP-SYN Scanner", font=("Arial", 13)).pack(
             anchor="w", padx=10, pady=(10, 5)
         )
+        ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Target Port").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
+        )
 
         self.output = tk.Text(self, height=10)
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -168,6 +193,25 @@ class CrackerPanel(ttk.Frame):
 
         ttk.Label(self, text="Hash Cracker", font=("Arial", 13)).pack(
             anchor="w", padx=10, pady=(10, 5)
+        )
+        ttk.Label(self, text="Single Hash (optional)").pack(anchor="w", padx=10)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Hash File (optional)").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Hash Type (optional)").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
         )
 
         self.output = tk.Text(self, height=10)
@@ -190,6 +234,18 @@ class DirectoryBrutePanel(ttk.Frame):
             anchor="w", padx=10, pady=(10, 5)
         )
 
+        ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
+        )
+
         self.output = tk.Text(self, height=10)
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -210,6 +266,18 @@ class SubdirBrutePanel(ttk.Frame):
             anchor="w", padx=10, pady=(10, 5)
         )
 
+        ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
+        )
+
         self.output = tk.Text(self, height=10)
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -228,6 +296,30 @@ class WpLoginPanel(ttk.Frame):
 
         ttk.Label(self, text="WordPress Login", font=("Arial", 13)).pack(
             anchor="w", padx=10, pady=(10, 5)
+        )
+
+        ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="User (optional)").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Userlist (optional)").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Password (optional)").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Label(self, text="Password list (optional)").pack(anchor="w", padx=10)
+        self.target_port_entry = ttk.Entry(self)
+        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+
+        ttk.Button(self, text="Run scanner", command=self.run).pack(
+            anchor="w", padx=10, pady=5
         )
 
         self.output = tk.Text(self, height=10)
