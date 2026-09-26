@@ -1,3 +1,5 @@
+from dataclasses import asdict
+from filehandler import write_json
 from ipaddress import IPv4Network, AddressValueError, NetmaskValueError
 import networkmapper
 import passwordcracker
@@ -42,6 +44,23 @@ class CliMenu:
         except Exception as e:
             print(f"An unexpected error occured {e}")
             return None
+
+    def _save_loot(self) -> str:
+        loot_dict = {}
+        loot_dict["hosts"] = {}
+        loot_dict["passwords"] = []
+        loot_dict["directories"] = []
+        loot_dict["logins"] = {}
+        for host in self.net_scanner.live_hosts.items():
+            loot_dict["hosts"][host[0]] = asdict(host[1])
+        for pwd in self.password_cracker.cracked:
+            loot_dict["passwords"].append(pwd)
+        for dir in self.directory_buster.loot:
+            loot_dict["directories"].append(dir)
+
+        filename = write_json(data=loot_dict)
+
+        print(f"Loot saved to {filename}")
 
     def _loot_hosts(self) -> str:
         """An internal function that displays found hosts
@@ -94,6 +113,7 @@ class CliMenu:
             "Password cracker": "Crack password hashes with wordlists",
             "Directory buster": "Find hidden subdomains and directories",
             "Login brute force": "Brute forces login for wordpress",
+            "Save": "Saves the loot to json file",
             "Quit": "Exits the program",
         }
         main_menu = TerminalMenu(tools, preview_command=lambda name: tools[name])
@@ -103,6 +123,8 @@ class CliMenu:
             main_menu_choice = list(tools)[idx]  # not the cleanest way
             if main_menu_choice == "Quit":
                 quitting = True
+            if main_menu_choice == "Save":
+                self._save_loot()
             elif main_menu_choice == "Setup":
                 self.setup_menu()
             elif main_menu_choice == "Loot":
@@ -280,6 +302,10 @@ class CliMenu:
                 back = True
             elif pwd_menu_choice == "Directory bust":
                 self.directory_buster.directory_brute(
+                    target=self.target_url, wordlist=self.wordlist
+                )
+            elif pwd_menu_choice == "Subdirectory bust":
+                self.directory_buster.subdirectory_brute(
                     target=self.target_url, wordlist=self.wordlist
                 )
 
