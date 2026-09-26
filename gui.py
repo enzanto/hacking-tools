@@ -94,7 +94,29 @@ class ArpPanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
-        print("Add run logic here")
+        target_host = self.target_host_entry.get()
+        if target_host == "":
+            self._log("Please enter a network address")
+            return
+        try:
+            validated_host = str(IPv4Network(target_host))
+        except AddressValueError as e:
+            self._log(f"Please select a valid address: {e}")
+            return
+        except NetmaskValueError as e:
+            self._log(f"Please select a valid network mask: {e}")
+            return
+        except ValueError as e:
+            self._log(f"unexpected value error: {e}")
+            return
+        except Exception as e:
+            self._log(f"unexpected error: {e}")
+            return
+
+        self.networkmapper.arp_scan(network=validated_host)
+        for host in self.networkmapper.live_hosts.values():
+            # print(host)
+            self._log(f"IP: {host.ip} - MAC: {host.mac}")
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
