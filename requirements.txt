@@ -1,0 +1,6 @@
+beautifulsoup4
+debugpy
+requests
+scapy
+simple-term-menu
+tqdm
