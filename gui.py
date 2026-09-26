@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 import networkmapper
+import passwordcracker
+import directorybuster
+import wordpresslogin
 
 
 class Header(ttk.Frame):
@@ -39,20 +42,20 @@ class Sidebar(ttk.Frame):
         self.tree = ttk.Treeview(self)
 
         mapper = self.tree.insert("", tk.END, text="Network Mapper")
-        self.tree.insert(mapper, tk.END, text="ARP Scan")
-        self.tree.insert(mapper, tk.END, text="ICMP Scan")
-        self.tree.insert(mapper, tk.END, text="TCP-ACK scan")
-        self.tree.insert(mapper, tk.END, text="TCP-SYN scan")
+        self.tree.insert(mapper, tk.END, text="ARP Scanner")
+        self.tree.insert(mapper, tk.END, text="ICMP Scanner")
+        self.tree.insert(mapper, tk.END, text="TCP-ACK Scanner")
+        self.tree.insert(mapper, tk.END, text="TCP-SYN Scanner")
         self.tree.item(mapper, open=True)
 
-        cracking = self.tree.insert("", tk.END, text="Hash cracker")
+        cracking = self.tree.insert("", tk.END, text="Hash Cracker")
         # self.tree.insert(cracking, tk.END, text="Hash cracker")
         # self.tree.item(cracking, open=True)
 
         web = self.tree.insert("", tk.END, text="Web Hacking")
-        self.tree.insert(web, tk.END, text="Directory Scan")
-        self.tree.insert(web, tk.END, text="Subdomain Scan")
-        self.tree.insert(web, tk.END, text="Wordpress Login")
+        self.tree.insert(web, tk.END, text="Directory Scanner")
+        self.tree.insert(web, tk.END, text="Subdomain Scanner")
+        self.tree.insert(web, tk.END, text="WordPress Login")
 
         self.tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -98,6 +101,146 @@ class ArpPanel(ttk.Frame):
         self.output.see(tk.END)
 
 
+class IcmpPanel(ttk.Frame):
+    def __init__(self, parent, networkmapper) -> None:
+        super().__init__(parent)
+        self.networkmapper = networkmapper
+
+        ttk.Label(self, text="ICMP Scanner", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Hello world")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
+class TcpAckPanel(ttk.Frame):
+    def __init__(self, parent, networkmapper) -> None:
+        super().__init__(parent)
+        self.networkmapper = networkmapper
+
+        ttk.Label(self, text="TCP-ACK Scanner", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Add Run logic here")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
+class TcpSynPanel(ttk.Frame):
+    def __init__(self, parent, networkmapper) -> None:
+        super().__init__(parent)
+        self.networkmapper = networkmapper
+
+        ttk.Label(self, text="TCP-SYN Scanner", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Add logic")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
+class CrackerPanel(ttk.Frame):
+    def __init__(self, parent, cracker) -> None:
+        super().__init__(parent)
+        self.cracker = cracker
+
+        ttk.Label(self, text="Hash Cracker", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Add logic")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
+class DirectoryBrutePanel(ttk.Frame):
+    def __init__(self, parent, dirbuster) -> None:
+        super().__init__(parent)
+        self.dirbuster = dirbuster
+
+        ttk.Label(self, text="Directory Scanner", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Add logic")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
+class SubdirBrutePanel(ttk.Frame):
+    def __init__(self, parent, dirbuster) -> None:
+        super().__init__(parent)
+        self.dirbuster = dirbuster
+
+        ttk.Label(self, text="Subdirectory Scanner", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Logic")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
+class WpLoginPanel(ttk.Frame):
+    def __init__(self, parent, wp_login) -> None:
+        super().__init__(parent)
+        self.wp_login = wp_login
+
+        ttk.Label(self, text="WordPress Login", font=("Arial", 13)).pack(
+            anchor="w", padx=10, pady=(10, 5)
+        )
+
+        self.output = tk.Text(self, height=10)
+        self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def run(self):
+        print("Logic")
+
+    def _log(self, msg):
+        self.output.insert(tk.END, msg + "\n")
+        self.output.see(tk.END)
+
+
 class App(tk.Tk):
     def __init__(
         self,
@@ -112,12 +255,24 @@ class App(tk.Tk):
         self.title("Hacking tools")
         # initialize imported tools
         self.networkmapper = networkmapper.NetworkMapper()
+        self.cracker = passwordcracker.PasswordCracker()
+        self.dirbuster = directorybuster.DirectoryBuster()
+        self.wp_login = wordpresslogin.WordpressLogin()
         # create panels
         self.header = Header(self)
         self.footer = Footer(self)
         self.menu = Sidebar(self)
         # Main panels in a selectable dict
-        self.main_panels = {"ARP Scan": ArpPanel(self, self.networkmapper)}
+        self.main_panels = {
+            "ARP Scanner": ArpPanel(self, self.networkmapper),
+            "ICMP Scanner": IcmpPanel(self, self.networkmapper),
+            "TCP-ACK Scanner": TcpAckPanel(self, self.networkmapper),
+            "TCP-SYN Scanner": TcpSynPanel(self, self.networkmapper),
+            "Hash Cracker": CrackerPanel(self, self.cracker),
+            "Directory Scanner": DirectoryBrutePanel(self, self.dirbuster),
+            "Subdomain Scanner": SubdirBrutePanel(self, self.dirbuster),
+            "WordPress Login": WpLoginPanel(self, self.wp_login),
+        }
         self.start_panel = MainPanel(self)
         # GUI layout
         self.columnconfigure(0, weight=0)
