@@ -1,3 +1,7 @@
+import json
+from datetime import datetime
+
+
 def read(filename: str, mode: str = "r") -> str | None:
     """
     Read the contents of a file.
@@ -92,3 +96,37 @@ def write(data: str | list[str], filename: str, mode: str = "w") -> None:
     finally:
         if file != None:
             file.close()
+
+
+def write_json(data: dict, filename: str | None = None, mode: str = "w") -> None:
+    """
+    Write a dict to a json file
+
+    Args:
+        data (str | list): The data to write. Can be a string or a list of strings.
+            When a list is provided, each item is written on a separate line.
+        filename (str): The path to the file to write to.
+        mode (str): The file mode (default: "w" for write, "a" for append).
+
+    Returns:
+        None
+
+    Raises:
+        Prints an error message if the file is not found or an unexpected error occurs.
+    """
+    file = None
+    if filename == None:
+        now = datetime.now()
+        filename = now.strftime("%Y-%m-%d-%H:%M.json")
+
+    try:
+        file = open(filename, mode)
+        json.dump(data, file, indent=2)
+    except FileNotFoundError as e:
+        print(f"File not found: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+    finally:
+        if file != None:
+            file.close()
+            return filename
