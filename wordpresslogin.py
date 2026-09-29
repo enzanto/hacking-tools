@@ -88,7 +88,7 @@ class WordpressLogin:
                 params["pwd"] = p
                 t = s.post(target, data=params)
                 if "Welcome to WordPress!" in t.text:
-                    self.loot[user] = p
+                    self.loot[u] = p
                     loot[user] = p
                     break
         return loot

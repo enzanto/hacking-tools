@@ -387,7 +387,6 @@ class SubdirBrutePanel(ttk.Frame):
         self.dirbuster.subdirectory_brute(target=target_host, wordlist=wordlist)
         for dir in self.dirbuster.loot:
             self._log(dir)
-        print("Logic")
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
