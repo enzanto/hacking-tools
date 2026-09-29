@@ -15,20 +15,6 @@ class DirectoryBuster:
         self.loot = []
         self.words = []
 
-    def _get_words(self, wordlist: str):
-        """An internal function to provide a list of words
-
-        This functions takes a wordlist provided with one word per line, and splits
-        it in to separate words.
-
-        args:
-            wordlist (str): A string with the location of the wordlist to open.
-
-        returns (list): A list with words for directory brute"""
-        words = []
-        with open(wordlist) as f:
-            words = f.read().split()
-        return words
 
     def directory_brute(self, target: str, wordlist: str):
         """A function to brute force directory locations from a wordlist
@@ -47,26 +33,31 @@ class DirectoryBuster:
         words = read_list(wordlist)
         headers = {"User-Agent": self.agent}
         s = requests.Session()
-        for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
-            if "." in i:
-                url = f"{target}/{i}"
-            else:
-                url = f"{target}/{i}/"
-            r = s.get(url, headers=headers)
-            if r.status_code == 200:
-                self.loot.append(url)
+        try:
+            for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
+                if "." in i:
+                    url = f"{target}/{i}"
+                else:
+                    url = f"{target}/{i}/"
+                r = s.get(url, headers=headers)
+                if r.status_code == 200:
+                    self.loot.append(url)
+        except TypeError as e:
+            print(e)
 
     def subdirectory_brute(self, target: str, wordlist: str):
         pattern = "^[a-zA-Z0-9]+[a-zA-Z0-9-][a-zA-Z0-9]+$"
         word_list = []
         raw_words = read_list(wordlist)
-        for word in raw_words:
-            if re.search(pattern, word):
-                word_list.append(word.lower())
+        try:
+            for word in raw_words:
+                if re.search(pattern, word):
+                    word_list.append(word.lower())
 
-        words = set(word_list)
-        # words = set(word_list.sort())
-        # words = self._get_words(wordlist)
+            words = set(word_list)
+        except TypeError as e:
+            print(f"{e}")
+            return "File not found"
         headers = {"User-Agent": self.agent}
         for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
             url = f"https://{i}.{target}"
