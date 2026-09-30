@@ -47,11 +47,8 @@ class Sidebar(ttk.Frame):
         self.tree.insert(mapper, tk.END, text="ICMP Scanner")
         self.tree.insert(mapper, tk.END, text="TCP-ACK Scanner")
         self.tree.insert(mapper, tk.END, text="TCP-SYN Scanner")
-        self.tree.item(mapper, open=True)
 
-        cracking = self.tree.insert("", tk.END, text="Hash Cracker")
-        # self.tree.insert(cracking, tk.END, text="Hash cracker")
-        # self.tree.item(cracking, open=True)
+        self.tree.insert("", tk.END, text="Hash Cracker")
 
         web = self.tree.insert("", tk.END, text="Web Hacking")
         self.tree.insert(web, tk.END, text="Directory Scanner")
