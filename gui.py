@@ -282,17 +282,9 @@ class CrackerPanel(ttk.Frame):
         ttk.Label(self, text="Hash Cracker", font=("Arial", 13)).pack(
             anchor="w", padx=10, pady=(10, 5)
         )
-        ttk.Label(self, text="Single Hash (optional)").pack(anchor="w", padx=10)
-        self.hash = ttk.Entry(self)
-        self.hash.pack(fill=tk.X, padx=10, pady=5)
-
-        ttk.Label(self, text="Hash File (optional)").pack(anchor="w", padx=10)
+        ttk.Label(self, text="Hash File").pack(anchor="w", padx=10)
         self.hash_file = ttk.Entry(self)
         self.hash_file.pack(fill=tk.X, padx=10, pady=5)
-
-        ttk.Label(self, text="Hash Type (optional)").pack(anchor="w", padx=10)
-        self.hash_type = ttk.Entry(self)
-        self.hash_type.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Label(self, text="Wordlist").pack(anchor="w", padx=10)
         self.wordlist = ttk.Entry(self)
@@ -306,15 +298,13 @@ class CrackerPanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
-        hash = self.hash.get() if self.hash.get() != "" else None
         hash_file = self.hash_file.get() if self.hash_file.get() != "" else None
-        hash_type = self.hash_type.get() if self.hash_type.get() != "" else None
         wordlist = self.wordlist.get() if self.wordlist.get() != "" else None
-        self.cracker.hash_cracker(
-            wordlist=wordlist, hash=hash, hashlist=hash_file, hash_type=hash_type
-        )
-        for pwd in self.cracker.cracked:
-            self._log(f"cracked password: {pwd}")
+        self.cracker.hash_cracker(wordlist=wordlist, hashlist=hash_file)
+        for pwd in self.cracker.cracked.values():
+            self._log(
+                f"password: {pwd['password']}, Hash type: {pwd['type']}, Hash: {pwd['hash']}"
+            )
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")

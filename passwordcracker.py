@@ -6,7 +6,7 @@ from filehandler import read_list
 
 class PasswordCracker:
     def __init__(self):
-        self.cracked: list = []
+        self.cracked: dict = {}
         self.wordlist: str | None = None
         self.hash_type: str | None = None
 
@@ -76,22 +76,30 @@ class PasswordCracker:
             for i in hashes:
                 hash_types.extend(self.verify_hash(i))
 
-        loot = []
+        loot = {}
         for line in tqdm(words, desc="Cracking hash", total=total_lines):
             try:  # skips entries that are not utf-8 encoded
                 decoded_line = line.decode().strip()
                 for h in hash_types:
-                    if hash_names[h](decoded_line.encode()).hexdigest() in hashes:
+                    hash = hash_names[h](decoded_line.encode()).hexdigest()
+                    if hash in hashes:
                         if decoded_line not in self.cracked:
-                            self.cracked.append(decoded_line)
-                        loot.append(decoded_line)
+                            self.cracked[decoded_line] = {
+                                "password": decoded_line,
+                                "hash": hash,
+                                "type": h,
+                            }
+                        loot[decoded_line] = {
+                            "password": decoded_line,
+                            "hash": hash,
+                            "type": h,
+                        }
                         break
             except UnicodeDecodeError:
                 continue
-        unique_loot = set(loot)
-        for l in unique_loot:
+        for l in loot:
             print(f"Added to loot: {l}")
-        return unique_loot
+        return loot
 
 
 if __name__ == "__main__":
