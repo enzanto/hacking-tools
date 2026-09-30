@@ -14,7 +14,7 @@ class PasswordCracker:
         hash_lengts = {
             32: ["md5"],
             40: ["sha1"],
-            56: ["sha225", "sha3_224"],
+            56: ["sha224", "sha3_224"],
             64: ["blake2s", "sha256", "sha3_256"],
             96: ["sha384", "sha3_384"],
             128: ["blake2b", "sha512", "sha3_512"],

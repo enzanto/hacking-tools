@@ -258,7 +258,6 @@ class NetworkMapper:
                         timeout=0.2,
                         verbose=0,
                     )
-                    # Maybe break after first validated response?
                     if ans is None:
                         continue
                     elif ans.haslayer(TCP) and ans[TCP].flags == "R":
