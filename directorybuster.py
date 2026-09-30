@@ -12,9 +12,8 @@ class DirectoryBuster:
         self.agent = (
             "Mozilla/5.0 (X11; Linux x86_64; rv:154.0) Gecko/20100101 Firefox/154.0"
         )
-        self.loot = []
+        self.loot = {}
         self.words = []
-
 
     def directory_brute(self, target: str, wordlist: str):
         """A function to brute force directory locations from a wordlist
@@ -31,6 +30,9 @@ class DirectoryBuster:
             loot (list[str]): Returns a list of strings with successful directories or files"""
 
         words = read_list(wordlist)
+        loot = {}
+        loot[target] = []
+        self.loot[target] = []
         headers = {"User-Agent": self.agent}
         s = requests.Session()
         try:
@@ -41,13 +43,17 @@ class DirectoryBuster:
                     url = f"{target}/{i}/"
                 r = s.get(url, headers=headers)
                 if r.status_code == 200:
-                    self.loot.append(url)
+                    self.loot[target].append(url)
         except TypeError as e:
             print(e)
+        return loot
 
     def subdirectory_brute(self, target: str, wordlist: str):
         pattern = "^[a-zA-Z0-9]+[a-zA-Z0-9-][a-zA-Z0-9]+$"
         word_list = []
+        # Removes the prefix in two steps, to ensure http:// and www is not present
+        sanitized_target = target.removeprefix("http://").removeprefix("www.")
+        self.loot[sanitized_target] = []
         raw_words = read_list(wordlist)
         try:
             for word in raw_words:
@@ -60,11 +66,11 @@ class DirectoryBuster:
             return "File not found"
         headers = {"User-Agent": self.agent}
         for i in tqdm(words, desc="Brute forcing directories", total=len(words)):
-            url = f"https://{i}.{target}"
+            url = f"https://{i}.{sanitized_target}"
             try:
                 r = requests.get(url, headers=headers, timeout=5)
                 if r.status_code == 200:
-                    self.loot.append(url)
+                    self.loot[sanitized_target].append(url)
             except requests.exceptions.RequestException:
                 continue
             finally:

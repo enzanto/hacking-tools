@@ -49,14 +49,14 @@ class CliMenu:
         loot_dict = {}
         loot_dict["hosts"] = {}
         loot_dict["passwords"] = []
-        loot_dict["directories"] = []
+        loot_dict["directories"] = {}
         loot_dict["logins"] = {}
         for host in self.net_scanner.live_hosts.items():
             loot_dict["hosts"][host[0]] = asdict(host[1])
         for pwd in self.password_cracker.cracked:
             loot_dict["passwords"].append(pwd)
-        for dir in self.directory_buster.loot:
-            loot_dict["directories"].append(dir)
+        for dir in self.directory_buster.loot.items():
+            loot_dict["directories"][dir[0]] = dir[1]
 
         filename = write_json(data=loot_dict)
 

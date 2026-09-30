@@ -339,9 +339,9 @@ class DirectoryBrutePanel(ttk.Frame):
         target_host = self.target_host_entry.get()
         wordlist = self.wordlist_entry.get()
         self.dirbuster.directory_brute(target=target_host, wordlist=wordlist)
-        for dir in self.dirbuster.loot:
-            self._log(dir)
-        print("Add logic")
+        for dir in self.dirbuster.loot.items():
+            for dirs in dir[1]:
+                self._log(dirs)
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
@@ -375,8 +375,9 @@ class SubdirBrutePanel(ttk.Frame):
         target_host = self.target_host_entry.get()
         wordlist = self.wordlist_entry.get()
         self.dirbuster.subdirectory_brute(target=target_host, wordlist=wordlist)
-        for dir in self.dirbuster.loot:
-            self._log(dir)
+        for dir in self.dirbuster.loot.items():
+            for dirs in dir[1]:
+                self._log(dirs)
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
