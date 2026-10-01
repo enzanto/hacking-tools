@@ -2,6 +2,21 @@
 
 This is a set of hacking tools built for my exam project at Noroff.
 
+## ⚠️ Legal Disclaimer
+
+This project and its tools are provided for **educational purposes and authorized security testing only**.
+
+The tools in this repository (network scanner, password cracker, directory/subdomain buster, and web login brute-forcer) are capable of actions that are **illegal without explicit, documented authorization** from the owner of the target system or network.
+
+By using this software, you agree that:
+
+- You will only use these tools against systems, networks, and accounts you **own** or have **explicit written permission** to test.
+- The author assumes **no liability** for misuse, damage, or legal consequences resulting from the use of this software.
+- This project is provided **"as is"**, without warranty of any kind.
+
+Unauthorized access to computer systems is a criminal offence in most jurisdictions. If in doubt, don't run it against anything you don't have permission to test.
+
+
 ## Requirements
 
 - Python3
