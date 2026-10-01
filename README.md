@@ -20,9 +20,27 @@ First clone the repository
 git clone https://github.com/enzanto/hacking-tools.git
 ```
 
+Create the virtual environment
 ```bash
 python -m venv venv
 ```
+
+Activate the virtual environment
+windows
+
+```powershell
+# set execution policy first
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+# Activate the venv
+./venv/Scripts/Activate.ps1
+```
+
+Linux
+```bash
+source venv/bin/activate
+```
+
+
 
 ```bash
 pip install -r requirements.txt
