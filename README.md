@@ -14,6 +14,17 @@ Windows also need to install npcap from [npcap.com](https://npcap.com/)
 
 ## Installation
 
+### Nix
+
+```bash
+# GUI
+nix run github:enzanto/hacking-tools
+# CLI
+nix run github:enzanto/hacking-tools#cli
+```
+
+### Windows and Linux
+
 First clone the repository
 
 ```bash
@@ -41,7 +52,7 @@ source venv/bin/activate
 ```
 
 
-
+Install the required packages
 ```bash
 pip install -r requirements.txt
 ```
