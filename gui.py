@@ -371,7 +371,7 @@ class SubdirBrutePanel(ttk.Frame):
     def run(self):
         target_host = self.target_host_entry.get()
         wordlist = self.wordlist_entry.get()
-        self.dirbuster.subdirectory_brute(target=target_host, wordlist=wordlist)
+        self.dirbuster.subdomain_brute(target=target_host, wordlist=wordlist)
         for dir in self.dirbuster.loot.items():
             for dirs in dir[1]:
                 self._log(dirs)

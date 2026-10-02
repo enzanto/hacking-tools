@@ -48,7 +48,7 @@ class DirectoryBuster:
             print(e)
         return loot
 
-    def subdirectory_brute(self, target: str, wordlist: str):
+    def subdomain_brute(self, target: str, wordlist: str):
         pattern = "^[a-zA-Z0-9]+[a-zA-Z0-9-][a-zA-Z0-9]+$"
         word_list = []
         # Removes the prefix in two steps, to ensure http:// and www is not present
