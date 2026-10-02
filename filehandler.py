@@ -98,18 +98,17 @@ def write(data: str | list[str], filename: str, mode: str = "w") -> None:
             file.close()
 
 
-def write_json(data: dict, filename: str | None = None, mode: str = "w") -> None:
+def write_json(data: dict, filename: str | None = None, mode: str = "w") -> None | str:
     """
     Write a dict to a json file
 
     Args:
-        data (str | list): The data to write. Can be a string or a list of strings.
-            When a list is provided, each item is written on a separate line.
+        data (dict): A dict with data
         filename (str): The path to the file to write to.
         mode (str): The file mode (default: "w" for write, "a" for append).
 
     Returns:
-        None
+        Filename
 
     Raises:
         Prints an error message if the file is not found or an unexpected error occurs.
@@ -122,6 +121,7 @@ def write_json(data: dict, filename: str | None = None, mode: str = "w") -> None
     try:
         file = open(filename, mode)
         json.dump(data, file, indent=2)
+        return filename
     except FileNotFoundError as e:
         print(f"File not found: {e}")
     except Exception as e:
@@ -129,4 +129,3 @@ def write_json(data: dict, filename: str | None = None, mode: str = "w") -> None
     finally:
         if file != None:
             file.close()
-            return filename
