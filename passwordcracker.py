@@ -103,13 +103,13 @@ class PasswordCracker:
 
 
 if __name__ == "__main__":
-    wordlist = (
-        "/home/fredrik/Documents/Noroff/fag/EP2/hacking-tools/wordlist/rockyou.txt"
-    )
-    # hash = "e99a18c428cb38d5f260853678922e03"
-    # hash = "07d10604216a46ce7439b32cfa7bcdd6"
-    pwd = "!!Boom!!"
-    # pwd = "password123"
-    hash = hashlib.md5(pwd.encode()).hexdigest()
-    test = PasswordCracker()
-    test.hash_cracker(hash=hash, wordlist=wordlist)
+    wordlist = input("Path of wordlist: ")
+    hashlist = input("Path of hashlist: ")
+    cracker = PasswordCracker()
+    cracker.hash_cracker(hashlist=hashlist, wordlist=wordlist)
+    save = input("Do you want to save loot to a file? y/n: ")
+    if save.lower() == "y":
+        import filehandler
+
+        filename = filehandler.write_json(cracker.cracked)
+        print(f"Loot saved to {filename}")
