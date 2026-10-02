@@ -79,6 +79,25 @@ class DirectoryBuster:
 
 if __name__ == "__main__":
     t = DirectoryBuster()
-    t.directory_brute(target="10.1.1.39", wordlist="wordlist/common.txt")
-    for loot in t.loot:
-        print(loot)
+    host = input("Type the address of the target: ")
+    wordlist = input("Type the path to the wordlist: ")
+    print("Select scanner:")
+    print("1: Sub directory brute")
+    print("2: Sub domain brute")
+    running = True
+    while running:
+        selection = input("type your selection number: ")
+        if selection == "1":
+            t.directory_brute(target=host, wordlist=wordlist)
+            running = False
+        elif selection == "2":
+            t.subdomain_brute(target=host, wordlist=wordlist)
+            running = False
+        else:
+            print("invalid selection")
+    save = input("Do you want to save loot to file? y/n: ")
+    if save.lower() == "y":
+        import filehandler
+
+        filename = filehandler.write_json(t.loot)
+        print(f"Loot saved to {filename}")
