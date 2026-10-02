@@ -364,20 +364,35 @@ class NetworkMapper:
 
 
 if __name__ == "__main__":
-    # test = NetworkMapper("192.168.1.0/24")
-    # test = NetworkMapper("10.1.1.32/27")
-    test = NetworkMapper("10.1.1.39")
+    scanner = NetworkMapper()
+    target_host = input("Select your target: ")
+    running = True
+    print("network mapper")
+    print("1: ARP scan")
+    print("2: ICMP scan")
+    print("3: TCP-ACK scan")
+    print("4: TCP-SYN scan")
+    while running:
+        selection = input("Select your scanner: ")
+        if selection == "1":
+            scanner.arp_scan(network=target_host)
+            running = False
+        elif selection == "2":
+            scanner.ping_network(network=target_host)
+            running = False
+        elif selection == "3":
+            scanner.tcp_ack(network=target_host)
+            running = False
+        elif selection == "4":
+            ports = input("Select targte ports: ")
+            scanner.tcp_syn(network=target_host, ports=ports)
+            running = False
+    loot = {}
+    for host in scanner.live_hosts.items():
+        loot[host[0]] = asdict(host[1])
+    save = input("Do you want to save loot to file? y/n: ")
+    if save.lower() == "y":
+        import filehandler
 
-    # results = test.arp_scan()
-    # results = test.ping_network()
-    # results = test.ping_network_fast()
-    # print(results)
-    # for host in test.live_hosts.values():
-    #     print(host)
-    results = test.tcp_syn(ports="22,80,443")
-    # results = test.tcp_ack(ports=[80])
-    # for host in test.live_hosts.values():
-    #     print(host)
-    print(test.live_hosts)
-    print(results)
-    ### Problem with sr is that it does not close it gracefully fast enough
+        filename = filehandler.write_json(loot)
+        print(f"Loot saved to {filename}")
