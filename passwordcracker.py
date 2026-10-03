@@ -11,6 +11,16 @@ class PasswordCracker:
         self.hash_type: str | None = None
 
     def verify_hash(self, hash: str):
+        """function to determine hash type
+
+        Takes the length of the hash string and compares it to the dictionary
+        then returns the list of possible hashes
+
+        args:
+            hash (str): the hash in string format
+
+        returns:
+            hash_lengths (list): a list of candidates for hash types."""
         hash_lengts = {
             32: ["md5"],
             40: ["sha1"],
