@@ -1,5 +1,7 @@
+from dataclasses import asdict
+from filehandler import write_json
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from ipaddress import IPv4Network, AddressValueError, NetmaskValueError
 import networkmapper
 import passwordcracker
@@ -33,15 +35,44 @@ class Footer(ttk.Frame):
 
     def __init__(
         self,
-        master: tk.Misc | None = None,
+        master: tk.Misc,
+        net_scanner,
+        password_cracker,
+        directory_buster,
+        wordpress_login,
     ) -> None:
         super().__init__(
             master,
         )
-        ttk.Button(self, text="Exit").pack(side=tk.RIGHT, anchor="e", padx=10, pady=5)
-        ttk.Button(self, text="Save & Exit").pack(
+        self.net_scanner = net_scanner
+        self.password_cracker = password_cracker
+        self.directory_buster = directory_buster
+        self.wordpress_login = wordpress_login
+        ttk.Button(self, text="Exit", command=master.destroy).pack(
             side=tk.RIGHT, anchor="e", padx=10, pady=5
         )
+        ttk.Button(self, text="Save & Exit", command=self.save).pack(
+            side=tk.RIGHT, anchor="e", padx=10, pady=5
+        )
+
+    def save(self):
+        loot_dict = {}
+        loot_dict["hosts"] = {}
+        loot_dict["passwords"] = []
+        loot_dict["directories"] = {}
+        loot_dict["logins"] = {}
+        for host in self.net_scanner.live_hosts.items():
+            loot_dict["hosts"][host[0]] = asdict(host[1])
+        for pwd in self.password_cracker.cracked:
+            loot_dict["passwords"].append(pwd)
+        for dir in self.directory_buster.loot.items():
+            loot_dict["directories"][dir[0]] = dir[1]
+        for wp in self.wordpress_login.loot.items():
+            loot_dict["logins"][wp[0]] = wp[1]
+
+        filename = write_json(data=loot_dict)
+        messagebox.showinfo("Loot saved", f"Loot saved to {filename}")
+        self.master.destroy()
 
 
 class Sidebar(ttk.Frame):
@@ -532,6 +563,7 @@ class App(tk.Tk):
 
     This class initializes all the scanners and tools, sets the layout
     then packs the panels in to the correct locations."""
+
     def __init__(
         self,
         screenName: str | None = None,
@@ -550,7 +582,13 @@ class App(tk.Tk):
         self.wp_login = wordpresslogin.WordpressLogin()
         # create panels
         self.header = Header(self)
-        self.footer = Footer(self)
+        self.footer = Footer(
+            self,
+            net_scanner=self.networkmapper,
+            password_cracker=self.cracker,
+            directory_buster=self.dirbuster,
+            wordpress_login=self.wp_login,
+        )
         self.menu = Sidebar(self)
         # Main panels in a selectable dict
         self.main_panels = {
@@ -587,9 +625,9 @@ class App(tk.Tk):
             return
         name = self.menu.tree.item(selection[0], "text")
 
-        # Look up a panel for this name; parents ("Recon") won't be in the dict
         panel = self.main_panels.get(name, self.start_panel)
         panel.tkraise()
 
 
-App()
+if __name__ == "__main__":
+    App()
