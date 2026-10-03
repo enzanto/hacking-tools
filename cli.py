@@ -277,7 +277,6 @@ class CliMenu:
             if scanner_menu_choice == "Back":
                 back = True
             elif scanner_menu_choice == "ARP-scan":
-                # TODO: Validate that self.target_hosts have been set!
                 self.net_scanner.arp_scan(network=self.target_hosts)
             elif scanner_menu_choice == "ICMP-scan":
                 self.net_scanner.ping_network(network=self.target_hosts)
