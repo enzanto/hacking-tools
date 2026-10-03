@@ -4,6 +4,7 @@ from ipaddress import IPv4Network, AddressValueError, NetmaskValueError
 import networkmapper
 import passwordcracker
 import directorybuster
+import wordpresslogin
 from simple_term_menu import TerminalMenu
 
 
@@ -13,12 +14,14 @@ class CliMenu:
         self.target_ports = None
         self.target_url = None
         self.hash = None
-        self.wordlist = "wordlist/rockyou.txt"
+        self.wordlist = "wordlist/rockyou-sample.txt"
         self.hash_type = None
         self.hash_list = None
+        self.userlist = None
         self.net_scanner = networkmapper.NetworkMapper()
         self.password_cracker = passwordcracker.PasswordCracker()
         self.directory_buster = directorybuster.DirectoryBuster()
+        self.wordpress_login = wordpresslogin.WordpressLogin()
 
     def _network_validation(self, network: str) -> str | None:
         """An internal validation function to check IPv4 validity
@@ -63,6 +66,8 @@ class CliMenu:
             loot_dict["passwords"].append(pwd)
         for dir in self.directory_buster.loot.items():
             loot_dict["directories"][dir[0]] = dir[1]
+        for wp in self.wordpress_login.loot.items():
+            loot_dict["logins"][wp[0]] = wp[1]
 
         filename = write_json(data=loot_dict)
 
@@ -110,6 +115,21 @@ class CliMenu:
         loot_string = "\n".join(loot)
         return loot_string
 
+    def _loot_wp(self) -> str:
+        """An internal function that displays found WordPress logins
+
+        This function display found wordpress logins
+
+        returns:
+            A multi-line string with discovered logins"""
+        loot_lines = self.wordpress_login.loot.items()
+        loot = []
+        for l in loot_lines:
+            loots = f"username: {l[0]}, Password: {l[1]}"
+            loot.append(loots)
+        loot_string = "\n".join(loot)
+        return loot_string
+
     def main_cli(self):
         """This displays the main CLI menu
 
@@ -145,6 +165,8 @@ class CliMenu:
                 self.password_cracker_menu()
             elif main_menu_choice == "Directory buster":
                 self.directory_buster_menu()
+            elif main_menu_choice == "Login brute force":
+                self.wordpress_login_menu()
 
     def setup_menu(self):
         """Displays the setup menu
@@ -160,6 +182,7 @@ class CliMenu:
             "Hash Type": "Hash type of hash",
             "Hash list": "Path to a file of hashes",
             "Wordlist": "Path to a wordlist file",
+            "Userlist": "Path to the userlist file",
             "Back": "Return to previous menu",
         }
         settings_menu = TerminalMenu(
@@ -202,9 +225,13 @@ class CliMenu:
                 self.hash_list = user_input
                 print(f"Hash has been set to {self.hash_list}\n")
             elif settings_menu_choice == "Wordlist":
-                user_input = input("Enter the path wo the wordlist: ")
+                user_input = input("Enter the path to the wordlist: ")
                 self.wordlist = user_input
-                print(f"wordlist has been set to {self.hash_list}\n")
+                print(f"wordlist has been set to {self.wordlist}\n")
+            elif settings_menu_choice == "Userlist":
+                user_input = input("Enter the path to the userlist: ")
+                self.userlist = user_input
+                print(f"userlist has been set to {self.userlist}\n")
 
     def loot_menu(self):
         """Displays the loot menu
@@ -215,6 +242,7 @@ class CliMenu:
             "Hosts with ports": self._loot_hosts(),
             "Passwords": self._loot_pwd(),
             "Directory buster": self._loot_dirb(),
+            "WordPress login": self._loot_wp(),
             "Back": "Return to previous menu",
         }
         loot_menu_object = TerminalMenu(
@@ -235,7 +263,7 @@ class CliMenu:
         scan_alternatives = {
             "ARP-scan": "Scans local network using ARP packets \n Requires target network set",
             "ICMP-scan": "an explanation",
-            "TCP-ACK scan": "An explanation",
+            "TCP-ACK-scan": "An explanation",
             "TCP-SYN-scan": "An explanation",
             "Back": "Return to previous menu",
         }
@@ -254,9 +282,7 @@ class CliMenu:
             elif scanner_menu_choice == "ICMP-scan":
                 self.net_scanner.ping_network(network=self.target_hosts)
             elif scanner_menu_choice == "TCP-ACK-scan":
-                self.net_scanner.tcp_ack(
-                    network=self.target_hosts, ports=self.target_ports
-                )
+                self.net_scanner.tcp_ack(network=self.target_hosts)
             elif scanner_menu_choice == "TCP-SYN-scan":
                 self.net_scanner.tcp_syn(
                     network=self.target_hosts, ports=self.target_ports
@@ -282,7 +308,6 @@ class CliMenu:
             if pwd_menu_choice == "Back":
                 back = True
             elif pwd_menu_choice == "Crack hash":
-                # TODO: Validate that self.target_hosts have been set!
                 self.password_cracker.hash_cracker(
                     hash=self.hash,
                     wordlist=self.wordlist,
@@ -315,8 +340,34 @@ class CliMenu:
                     target=self.target_url, wordlist=self.wordlist
                 )
             elif pwd_menu_choice == "Subdirectory bust":
-                self.directory_buster.subdirectory_brute(
+                self.directory_buster.subdomain_brute(
                     target=self.target_url, wordlist=self.wordlist
+                )
+
+    def wordpress_login_menu(self):
+        """Displays the wordpress login menu
+
+        the WordPress login menu show selected target, and wordlists."""
+
+        wp_alternatives = {
+            "Info!": f"Target url: {self.target_url}\nUserlist: {self.userlist}\nWordlist: {self.wordlist}",
+            "Login brute force": "Performs the login brute force",
+            "Back": "Return to previous menu",
+        }
+        wp_menu = TerminalMenu(
+            wp_alternatives, preview_command=lambda name: wp_alternatives[name]
+        )
+        back = False
+        while not back:
+            idx = wp_menu.show()
+            pwd_menu_choice = list(wp_alternatives)[idx]
+            if pwd_menu_choice == "Back":
+                back = True
+            elif pwd_menu_choice == "Login brute force":
+                self.wordpress_login.login_brute(
+                    target=self.target_url,
+                    userlist=self.userlist,
+                    passlist=self.wordlist,
                 )
 
 
