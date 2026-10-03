@@ -524,24 +524,16 @@ class WpLoginPanel(ttk.Frame):
         )
 
         ttk.Label(self, text="Target Host").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        self.target_host_entry = ttk.Entry(self)
+        self.target_host_entry.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Label(self, text="User (optional)").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        ttk.Label(self, text="Userlist").pack(anchor="w", padx=10)
+        self.target_userlist_entry = ttk.Entry(self)
+        self.target_userlist_entry.pack(fill=tk.X, padx=10, pady=5)
 
-        ttk.Label(self, text="Userlist (optional)").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
-
-        ttk.Label(self, text="Password (optional)").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
-
-        ttk.Label(self, text="Password list (optional)").pack(anchor="w", padx=10)
-        self.target_port_entry = ttk.Entry(self)
-        self.target_port_entry.pack(fill=tk.X, padx=10, pady=5)
+        ttk.Label(self, text="Password list").pack(anchor="w", padx=10)
+        self.target_wordlist_entry = ttk.Entry(self)
+        self.target_wordlist_entry.pack(fill=tk.X, padx=10, pady=5)
 
         ttk.Button(self, text="Run scanner", command=self.run).pack(
             anchor="w", padx=10, pady=5
@@ -551,7 +543,14 @@ class WpLoginPanel(ttk.Frame):
         self.output.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def run(self):
-        print("Logic")
+        target_host = self.target_host_entry.get()
+        userlist = self.target_userlist_entry.get()
+        wordlist = self.target_wordlist_entry.get()
+        self.wp_login.login_brute(
+            target=target_host, userlist=userlist, passlist=wordlist
+        )
+        for loot in self.wp_login.loot.items():
+            self._log(f"user: {loot[0]}, Password: {loot[1]}")
 
     def _log(self, msg):
         self.output.insert(tk.END, msg + "\n")
