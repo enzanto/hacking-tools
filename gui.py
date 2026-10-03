@@ -8,6 +8,11 @@ import wordpresslogin
 
 
 class Header(ttk.Frame):
+    """This is the header panel of the gui
+
+    args:
+        master (tk.misc): the main frame calling this panel"""
+
     def __init__(
         self,
         master: tk.Misc | None = None,
@@ -19,6 +24,13 @@ class Header(ttk.Frame):
 
 
 class Footer(ttk.Frame):
+    """This is the footer panel of the gui
+
+    contains buttons for save, and exit
+
+    args:
+        master (tk.misc): the main frame calling this panel"""
+
     def __init__(
         self,
         master: tk.Misc | None = None,
@@ -33,6 +45,13 @@ class Footer(ttk.Frame):
 
 
 class Sidebar(ttk.Frame):
+    """This is the sidebar panel of the gui
+
+    This holds the treeview items of the menu.
+
+    args:
+        master (tk.misc): the main frame calling this panel"""
+
     def __init__(
         self,
         master: tk.Misc | None = None,
@@ -62,6 +81,13 @@ class Sidebar(ttk.Frame):
 
 
 class MainPanel(ttk.Frame):
+    """This is the main panel of the gui
+
+    This is the placeholder that displays when nothing is selected
+
+    args:
+        master (tk.misc): the main frame calling this panel"""
+
     def __init__(
         self,
         master: tk.Misc | None = None,
@@ -73,8 +99,17 @@ class MainPanel(ttk.Frame):
 
 
 class ArpPanel(ttk.Frame):
-    def __init__(self, parent, networkmapper) -> None:
-        super().__init__(parent)
+    """This is the ARP panel of the gui
+
+    This arp panel, that has inputs for target host, a run button
+    and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        networkmapper: The network mapper function."""
+
+    def __init__(self, master, networkmapper) -> None:
+        super().__init__(master)
         self.networkmapper = networkmapper
 
         ttk.Label(self, text="ARP Scanner", font=("Arial", 13)).pack(
@@ -121,8 +156,17 @@ class ArpPanel(ttk.Frame):
 
 
 class IcmpPanel(ttk.Frame):
-    def __init__(self, parent, networkmapper) -> None:
-        super().__init__(parent)
+    """This is the ICMP panel of the gui
+
+    This ICMP panel, that has inputs for target host, a run button
+    and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        networkmapper: the networkmapper function"""
+
+    def __init__(self, master, networkmapper) -> None:
+        super().__init__(master)
         self.networkmapper = networkmapper
 
         ttk.Label(self, text="ICMP Scanner", font=("Arial", 13)).pack(
@@ -169,8 +213,17 @@ class IcmpPanel(ttk.Frame):
 
 
 class TcpAckPanel(ttk.Frame):
-    def __init__(self, parent, networkmapper) -> None:
-        super().__init__(parent)
+    """This is the TCP-ACK panel of the gui
+
+    This TCP-ACK panel, that has inputs for target host, a run button
+    and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        networkmapper: the networkmapper function"""
+
+    def __init__(self, master, networkmapper) -> None:
+        super().__init__(master)
         self.networkmapper = networkmapper
 
         ttk.Label(self, text="TCP-ACK Scanner", font=("Arial", 13)).pack(
@@ -219,8 +272,17 @@ class TcpAckPanel(ttk.Frame):
 
 
 class TcpSynPanel(ttk.Frame):
-    def __init__(self, parent, networkmapper) -> None:
-        super().__init__(parent)
+    """This is the TCP-SYN panel of the gui
+
+    This TCP-SYN panel, that has inputs for target host, target ports,
+    a run button and an output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        networkmapper: the networkmapper function"""
+
+    def __init__(self, master, networkmapper) -> None:
+        super().__init__(master)
         self.networkmapper = networkmapper
 
         ttk.Label(self, text="TCP-SYN Scanner", font=("Arial", 13)).pack(
@@ -272,8 +334,18 @@ class TcpSynPanel(ttk.Frame):
 
 
 class CrackerPanel(ttk.Frame):
-    def __init__(self, parent, cracker) -> None:
-        super().__init__(parent)
+    """This is the password cracker panel of the gui
+
+    This password cracker panel, that has inputs for hash file, wordlist,
+    and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        cracker: The password cracker module
+    """
+
+    def __init__(self, master, cracker) -> None:
+        super().__init__(master)
         self.cracker = cracker
 
         ttk.Label(self, text="Hash Cracker", font=("Arial", 13)).pack(
@@ -309,8 +381,18 @@ class CrackerPanel(ttk.Frame):
 
 
 class DirectoryBrutePanel(ttk.Frame):
-    def __init__(self, parent, dirbuster) -> None:
-        super().__init__(parent)
+    """This is the directory brute panel of the gui
+
+    This directory brute panel, that has inputs for target host, wordlist
+    and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        dirbuster: The directory buster
+    """
+
+    def __init__(self, master, dirbuster) -> None:
+        super().__init__(master)
         self.dirbuster = dirbuster
 
         ttk.Label(self, text="Directory Scanner", font=("Arial", 13)).pack(
@@ -346,8 +428,18 @@ class DirectoryBrutePanel(ttk.Frame):
 
 
 class SubdirBrutePanel(ttk.Frame):
-    def __init__(self, parent, dirbuster) -> None:
-        super().__init__(parent)
+    """This is the subdomain brute panel of the gui
+
+    This subdomain brute panel, that has inputs for target host, wordlist
+    and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        dirbuster: The directory buster
+    """
+
+    def __init__(self, master, dirbuster) -> None:
+        super().__init__(master)
         self.dirbuster = dirbuster
 
         ttk.Label(self, text="Subdirectory Scanner", font=("Arial", 13)).pack(
@@ -382,8 +474,18 @@ class SubdirBrutePanel(ttk.Frame):
 
 
 class WpLoginPanel(ttk.Frame):
-    def __init__(self, parent, wp_login) -> None:
-        super().__init__(parent)
+    """This is the WordPress login panel of the gui
+
+    This  WordPress login panel, that has inputs for target host, userlist,
+    passlist and a output panel
+
+    args:
+        master (tk.misc): the main frame calling this panel
+        wp_login: the wordpress login function.
+    """
+
+    def __init__(self, master, wp_login) -> None:
+        super().__init__(master)
         self.wp_login = wp_login
 
         ttk.Label(self, text="WordPress Login", font=("Arial", 13)).pack(
@@ -426,6 +528,10 @@ class WpLoginPanel(ttk.Frame):
 
 
 class App(tk.Tk):
+    """The main App program for the GUI
+
+    This class initializes all the scanners and tools, sets the layout
+    then packs the panels in to the correct locations."""
     def __init__(
         self,
         screenName: str | None = None,
