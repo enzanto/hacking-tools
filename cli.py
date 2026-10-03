@@ -45,7 +45,13 @@ class CliMenu:
             print(f"An unexpected error occured {e}")
             return None
 
-    def _save_loot(self) -> str:
+    def _save_loot(self) -> None:
+        """Internal function to save loot to file
+
+        This function collects all the loot from the modules, and combines
+        them in to a single dictionary. This is passed to the write_json function
+
+        returns None"""
         loot_dict = {}
         loot_dict["hosts"] = {}
         loot_dict["passwords"] = []
