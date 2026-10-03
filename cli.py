@@ -262,9 +262,9 @@ class CliMenu:
 
         scan_alternatives = {
             "ARP-scan": "Scans local network using ARP packets \n Requires target network set",
-            "ICMP-scan": "an explanation",
-            "TCP-ACK-scan": "An explanation",
-            "TCP-SYN-scan": "An explanation",
+            "ICMP-scan": "Scans target network with Ping",
+            "TCP-ACK-scan": "Scans target host with ACK scan",
+            "TCP-SYN-scan": "Scans target host with SYN, locates ports",
             "Back": "Return to previous menu",
         }
         scanner_menu = TerminalMenu(
