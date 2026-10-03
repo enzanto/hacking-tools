@@ -102,8 +102,12 @@ class CliMenu:
 
         returns:
             A multi-line string with discovered hashes"""
-        loot_lines = self.directory_buster.loot
-        loot_string = "\n".join(loot_lines)
+        loot_lines = self.directory_buster.loot.items()
+        loot = []
+        for l in loot_lines:
+            for i in l[1]:
+                loot.append(i)
+        loot_string = "\n".join(loot)
         return loot_string
 
     def main_cli(self):
