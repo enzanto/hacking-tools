@@ -24,7 +24,6 @@ class WordpressLogin:
         returns:
             params (dict): A dict with input fields"""
         params = {}
-        print(type(content))
         soup = BeautifulSoup(content, "html.parser")
         for param in soup.find_all("input"):
             name = param.get("name")
