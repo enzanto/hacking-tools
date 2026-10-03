@@ -49,6 +49,18 @@ class DirectoryBuster:
         return loot
 
     def subdomain_brute(self, target: str, wordlist: str):
+        """A function to brute force subdomains from a wordlist
+
+        This function takes the wordlist, and sends in to _get_words to retrieve a list
+        then it filters out invalid subdomain types by regex, before testing the subdomain
+        prefixes are removed. Subdomains woth a valid 200 response is added to loot.
+
+        args:
+            target (str): The base URL of the targets
+            wordlist (str): The location of the wordlist file
+
+        returns:
+            loot (list[str]): Returns a list of strings with successful directories or files"""
         pattern = "^[a-zA-Z0-9]+[a-zA-Z0-9-][a-zA-Z0-9]+$"
         word_list = []
         # Removes the prefix in two steps, to ensure http:// and www is not present
