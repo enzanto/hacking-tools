@@ -116,7 +116,7 @@ def write_json(data: dict, filename: str | None = None, mode: str = "w") -> None
     file = None
     if filename == None:
         now = datetime.now()
-        filename = now.strftime("%Y-%m-%d-%H:%M.json")
+        filename = now.strftime("%Y-%m-%d-%H_%M.json")
 
     try:
         file = open(filename, mode)
